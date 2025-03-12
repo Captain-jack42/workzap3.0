@@ -1,0 +1,99 @@
+/* Reset some default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family:  sans;
+    background: linear-gradient(to right, #a995be, #548ef2); /* Vibrant gradient background */
+    color: #720281; /* Dark text for readability */
+    line-height: 1.4; /* Improved line height for readability */
+}
+
+.container {
+    max-width: 600px; /* Maximum width for the container */
+    margin: 5rem auto; /* Center the container with margin */
+    padding: 2rem; /* Padding around the container */
+    background: rgb(255, 255, 255); /* White background for the container */
+    border-radius: 20px; /* Rounded corners */
+    box-shadow: 20px 10px 20px 20px rgba(142, 12, 153, 0.2); /* Subtle shadow for depth */
+    transition: transform 0.3s; /* Smooth transition for hover effect */
+}
+
+.container:hover {
+    transform: scale(1.02); /* Slightly enlarge on hover */
+}
+
+.header {
+    text-align: center; /* Center the header text */
+    margin-bottom: 2rem; /* Space below the header */
+}
+
+.header h1 {
+    color: #6a0094; /* Darker color for the main title */
+    font-size: 2.5rem; /* Larger font size for the title */
+    margin-bottom: 0.5rem; /* Space below the title */
+}
+
+.header p {
+    color: #9b24db; /* Medium gray for the subtitle */
+    font-size: 1.1rem; /* Slightly larger font size for the subtitle */
+}
+
+.feedback-form {
+    display: flex; /* Flex layout for the form */
+    flex-direction: column; /* Stack items vertically */
+}
+#feedback{
+  height : 100px;
+}
+.form-group {
+    margin-bottom: 1.5rem; /* Space below each form group */
+}
+
+label {
+    font-weight: bold; /* Bold labels */
+    margin-bottom: 0.5rem; /* Space below labels */
+    display: block; /* Block display for labels */
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+    width: 100%; /* Full width for inputs */
+    padding: 0.8rem; /* Padding for inputs */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px; /* Rounded corners for inputs */
+    font-size: 1rem; /* Font size for inputs */
+    transition: border-color 0.3s; /* Smooth transition for border color */
+    font-family: 'Arial', sans-serif; /* Consistent font family */
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    border-color: #6a11cb; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+}
+
+textarea {
+    resize: none; /* Disable resizing for textarea */
+}
+
+.submit-btn {
+    background: #4f3e5e; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* No border */
+    padding: 0.8rem; /* Padding for button */
+    border-radius: 5px; /* Rounded corners for button */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 1.1rem; /* Font size for button */
+    transition: background 0.3s, transform 0.3s; /* Smooth transition for background color */
+}
+
+.submit-btn:hover {
+    background: #7820a4; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}

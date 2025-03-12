@@ -1,0 +1,14 @@
+const path = require('path');
+const express = require('express');
+const Userrouter = express.Router();
+const rootdir = require('../utils/pathUtil');
+const homecontroller = require('../controller/home');
+Userrouter.get("/",homecontroller.getLogin);
+ Userrouter.get("/home",homecontroller.getHome);
+  Userrouter.get("/Login",homecontroller.getLogin);
+Userrouter.get("/home/form",homecontroller.getForm);
+Userrouter.get("/postjob",homecontroller.getPostjob);
+Userrouter.get("/help-support", homecontroller.gethelp);
+Userrouter.get("/about-us" , homecontroller.getAbout);
+Userrouter.get("/contact" , homecontroller.getContact);
+exports.Userrouter = Userrouter;
