@@ -17,7 +17,7 @@ app.use(Hostrouter);
 app.use(express.static(path.join(rootdir,'public')));
 app.use(errorcontroller.Error404);
 
-const port = 3001;
+const port = 3000;
 mongoConnect(()=>{
   app.listen(port,()=>{
     console.log(`server Started At: http://localhost:${port}/home`);
