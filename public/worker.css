@@ -1,0 +1,122 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.page-title {
+  text-align: center;
+  color: #2d3436;
+  margin-bottom: 40px;
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.worker-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
+  padding: 20px;
+}
+
+.worker-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.worker-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #00c6fb 0%, #005bea 100%);
+}
+
+.worker-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.worker-card h4 {
+  margin: 15px 0;
+  color: #2d3436;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.worker-card h4 i {
+  color: #005bea;
+  font-size: 1.2rem;
+}
+
+.worker-card h4 span {
+  font-weight: 400;
+  color: #636e72;
+}
+
+.hire-btn {
+  background: linear-gradient(90deg, #00c6fb 0%, #005bea 100%);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hire-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(0,108,234,0.4);
+}
+
+.hire-btn i {
+  font-size: 1.1rem;
+}
+
+.skills-tag {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  margin: 5px;
+}
+
+@media (max-width: 768px) {
+  .worker-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+}

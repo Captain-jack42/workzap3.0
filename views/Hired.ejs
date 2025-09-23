@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="Hired.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>Hired Worker Details</title>
+</head>
+<body>
+  <div class="page-container">
+    <header class="header">
+      <h1><i class="fas fa-users-gear"></i> Hired Worker Details</h1>
+      <p>Meet our talented team members who are making a difference</p>
+    </header>
+
+    <div class="search-filter">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search workers...">
+      </div>
+    </div>
+
+    <div class="workers-grid">
+      <% matchedAccounts.forEach(Id => { %>
+      <div class="worker-card">
+        <div class="worker-header">
+          <div class="worker-image">
+            <img src="\images\836.jpg" alt="Worker Profile">
+          </div>
+          <div class="status-badge">Active</div>
+        </div>
+        
+        <div class="worker-info">
+          <h2 class="worker-name">
+            <%= Id.fullName %> 
+            <span class="gender-badge"><i class="fas <%= Id.gender.toLowerCase() === 'male' ? 'fa-mars' : 'fa-venus' %>"></i> <%= Id.gender %></span>
+          </h2>
+          
+          <div class="worker-role">
+            <i class="fas fa-briefcase"></i>
+            <span><%= Id.profession %></span>
+          </div>
+
+          <div class="experience-bar">
+            <i class="fas fa-clock"></i>
+            <span>Experience: <%= Id.experience %></span>
+          </div>
+
+          <div class="skills-container">
+            <h3><i class="fas fa-tools"></i> Skills</h3>
+            <div class="skills-grid">
+              <% Id.skills.split(',').forEach(skill => { %>
+                <span class="skill-tag"><%= skill.trim() %></span>
+              <% }) %>
+            </div>
+          </div>
+
+          <div class="worker-footer">
+            <div class="location">
+              <i class="fas fa-location-dot"></i>
+              <span>New York</span>
+            </div>
+            <div class="salary">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>$80,000/year</span>
+            </div>
+          </div>
+
+          <button class="contact-btn">
+            <i class="fas fa-envelope"></i>
+            Contact Worker
+          </button>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</body>
+</html>
