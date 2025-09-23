@@ -3,6 +3,7 @@ const Hired = require("../models/Hired");
 const Home = require("../models/Home");
 const Job = require("../models/PostJob");
 const Signup = require("../models/Signup");
+const bcrypt = require('bcryptjs')
 
 exports.getHostHome =(req,res,next)=>{
   res.render('host-home');
@@ -72,29 +73,31 @@ exports.getPostedJob=(req,res,next)=>{
   });
 }
 
-exports.postSignup=(req,res,next)=>{
-  const {fullname,email,phone,password} = req.body;
-  const acc = new Signup(fullname,email,phone,password) ;
-  acc.save();
-
-  res.render('Login');
+exports.postSignup = (req, res, next) => {
+  const { fullname, email, phone, password } = req.body;
+  bcrypt.hash(password, 12).then(hashedPassword => {
+    const acc = new Signup(fullname, email, phone, hashedPassword);
+    acc.save();
+    res.render('Login');
+  });
 };
 
 exports.postLogin = (req, res, next) => {
   Signup.fetchAll().then(accounts => {
-    const matchingAccount = accounts.find(account => 
-      account.email === req.body.email && 
-      account.password === req.body.password
-    );
-
-    if (matchingAccount) {
-      req.session.isLoggedIn = true;
-      return req.session.save(() => {
-        res.redirect('/home');
-      });
-    } else {
-      res.render('Login', { error: 'Invalid email or password' });
+    const matchingAccount = accounts.find(account => account.email === req.body.email);
+    if (!matchingAccount) {
+      return res.render('Login', { error: 'Invalid email or password' });
     }
+    bcrypt.compare(req.body.password, matchingAccount.password).then(doMatch => {
+      if (doMatch) {
+        req.session.isLoggedIn = true;
+        return req.session.save(() => {
+          res.redirect('/home');
+        });
+      } else {
+        res.render('Login', { error: 'Invalid email or password' });
+      }
+    });
   });
 };
 
