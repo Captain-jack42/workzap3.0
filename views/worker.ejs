@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Workers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/worker.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+  <h1 class="page-title">Available Workers</h1>
+  <div class="worker-grid">
+    <% registeredAc.forEach(Id => { %>
+      <div class="worker-card">
+        <h4><i class="fas fa-user"></i>Name: <span><%= Id.fullName %></span></h4>
+        <h4><i class="fas fa-venus-mars"></i>Gender: <span><%= Id.gender %></span></h4>
+        <h4><i class="fas fa-briefcase"></i>Profession: <span><%= Id.profession %></span></h4>
+        <h4><i class="fas fa-clock"></i>Experience: <span><%= Id.experience %></span></h4>
+        <h4><i class="fas fa-tools"></i>Skills:</h4>
+        <div>
+          <% Id.skills.split(',').forEach(skill => { %>
+            <span class="skills-tag"><%= skill.trim() %></span>
+          <% }) %>
+        </div>
+        <form action="/hiring" method="post">
+          <button type="submit" class="hire-btn">
+          <i class="fas fa-handshake"></i>
+          Hire Now
+        </button>
+        <input type="hidden" name="id"  value="<%= Id._id %>"/>
+      </form>
+      </div>
+    <% }) %>
+  </div>
+</body>
+</html>
