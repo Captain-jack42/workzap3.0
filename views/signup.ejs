@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/Signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    <div class="page-container">
+        <div class="container">
+            <div class="form-container">
+                <h1>Create Account</h1>
+                <p class="subtitle">Get started with your free account</p>
+                <form action="/signup" method="POST">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="fullname" placeholder="Full Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" name="phone" placeholder="Contact Number" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Password" required>
+                    </div>
+                    <div class="input-group" style="display:flex;flex-direction:column;gap:6px;">
+                    <label for="role" class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
+                        Select role
+                    </label>
+
+                    <select id="role" name="userType" required
+                    style="appearance:none;-webkit-appearance:none;-moz-appearance:none;padding:10px 12px;border:1px solid #cfcfcf;border-radius:6px;background:#fff url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23999%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center;background-size:14px;font-size:14px;color:#222;cursor:pointer;outline:none;">
+                    <option value="" disabled selected>Select role</option>
+                    <option value="worker">Worker</option>
+                    <option value="hirer">Hirer</option>
+                    </select>
+                    </div>
+
+
+                    
+                    <button type="submit" class="signup-btn">Create Account</button>
+                </form>
+                <div class="social-signup">
+                    <p>Or sign up with</p>
+                    <div class="social-buttons">
+                        <a href="/auth/google" class="social-btn google">
+                            <i class="fab fa-google"></i> Google
+                        </a>
+                        <a href="/auth/facebook" class="social-btn facebook">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                    </div>
+                </div>
+                <p class="login-link">
+                    Already have an account? <a href="/login">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
