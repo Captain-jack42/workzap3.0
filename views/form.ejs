@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker-Registration-Form</title>
+  <link rel="stylesheet" href="/form.css">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="page-container" style="width: 100vw; ">
+  <%- include('partials/header') %>
+  <div class="container">
+    
+    
+  
+  <div class="form-container">
+    
+    <div class="form-header">
+      <i class="fas fa-user-plus"></i>
+      <h2>Worker Registration Form</h2>
+      <p>Please fill in your details to register</p>
+    </div>
+    <form action="/form-submit" method="POST" class="modern-form">
+      <!-- Personal Information -->
+      <fieldset class="form-section">
+        <legend><i class="fas fa-user"></i> Personal Information</legend>
+        <!-- <div class="form-group">
+          <label for="id"><i class="fas fa-user-circle"></i> Unique ID:</label>
+          <input type="number" id="id" name="id" placeholder="Enter any unique ID" required>
+        </div> -->
+        <div class="form-group">
+          <label for="fullName"><i class="fas fa-user-circle"></i> Full Name:</label>
+          <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="dob"><i class="fas fa-calendar"></i> Date of Birth:</label>
+          <input type="date" id="dob" name="dob" required>
+        </div>
+        <div class="form-group">
+          <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+          <select id="gender" name="gender" required>
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </fieldset>
+      
+      <!-- Professional Information -->
+      <fieldset class="form-section">
+        <legend><i class="fas fa-briefcase"></i> Professional Information</legend>
+        <div class="form-group">
+          <label for="profession"><i class="fas fa-hard-hat"></i> Profession:</label>
+          <select id="profession" name="profession" required>
+            <option value="">Select Profession</option>
+            <!-- Construction & Trades -->
+            <optgroup label="Construction & Trades">
+              <option value="carpenter">Carpenter</option>
+              <option value="plumber">Plumber</option>
+              <option value="electrician">Electrician</option>
+              <option value="painter">Painter</option>
+              <option value="mason">Mason</option>
+              <option value="welder">Welder</option>
+              <option value="hvac_technician">HVAC Technician</option>
+              <option value="roofer">Roofer</option>
+            </optgroup>
+            <!-- Professional Services -->
+            <optgroup label="Professional Services">
+              <option value="accountant">Accountant</option>
+              <option value="lawyer">Lawyer</option>
+              <option value="doctor">Doctor</option>
+              <option value="engineer">Engineer</option>
+              <option value="architect">Architect</option>
+              <option value="teacher">Teacher</option>
+            </optgroup>
+            <!-- Technology -->
+            <optgroup label="Technology">
+              <option value="software_developer">Software Developer</option>
+              <option value="data_scientist">Data Scientist</option>
+              <option value="network_engineer">Network Engineer</option>
+              <option value="cybersecurity_specialist">Cybersecurity Specialist</option>
+            </optgroup>
+            <!-- Healthcare -->
+            <optgroup label="Healthcare">
+              <option value="nurse">Nurse</option>
+              <option value="pharmacist">Pharmacist</option>
+              <option value="dentist">Dentist</option>
+              <option value="physiotherapist">Physiotherapist</option>
+            </optgroup>
+            <!-- Creative & Media -->
+            <optgroup label="Creative & Media">
+              <option value="graphic_designer">Graphic Designer</option>
+              <option value="photographer">Photographer</option>
+              <option value="journalist">Journalist</option>
+              <option value="artist">Artist</option>
+            </optgroup>
+            <!-- Service Industry -->
+            <optgroup label="Service Industry">
+              <option value="chef">Chef</option>
+              <option value="hairdresser">Hairdresser</option>
+              <option value="beautician">Beautician</option>
+              <option value="personal_trainer">Personal Trainer</option>
+            </optgroup>
+            <!-- Business & Finance -->
+            <optgroup label="Business & Finance">
+              <option value="financial_advisor">Financial Advisor</option>
+              <option value="business_analyst">Business Analyst</option>
+              <option value="marketing_specialist">Marketing Specialist</option>
+              <option value="hr_professional">HR Professional</option>
+            </optgroup>
+            <!-- Transportation -->
+            <optgroup label="Transportation">
+              <option value="driver">Driver</option>
+              <option value="pilot">Pilot</option>
+              <option value="ship_captain">Ship Captain</option>
+              <option value="logistics_manager">Logistics Manager</option>
+            </optgroup>
+            <!-- Agriculture & Environment -->
+            <optgroup label="Agriculture & Environment">
+              <option value="farmer">Farmer</option>
+              <option value="landscaper">Landscaper</option>
+              <option value="environmental_scientist">Environmental Scientist</option>
+              <option value="veterinarian">Veterinarian</option>
+            </optgroup>
+            <!-- Other -->
+            <optgroup label="Other">
+              <option value="other">Other Profession</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="experience"><i class="fas fa-clock"></i> Years of Experience:</label>
+          <input type="number" id="experience" name="experience" min="0" placeholder="Years of experience" required>
+        </div>
+        <div class="form-group">
+          <label for="skills"><i class="fas fa-tools"></i> Skills:</label>
+          <textarea id="skills" name="skills" rows="3" placeholder="List your relevant skills"></textarea>
+        </div>
+      </fieldset>
+
+      <!-- Contact Information -->
+      <fieldset class="form-section">
+        <legend><i class="fas fa-address-card"></i> Contact Information</legend>
+        <div class="form-group">
+          <label for="phone"><i class="fas fa-phone"></i> Phone Number:</label>
+          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+        </div>
+        <div class="form-group">
+          <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+          <input type="email" id="email" name="email" placeholder="<%= email %>" value="<%= email %>" readonly required>
+        </div>
+        <div class="form-group">
+          <label for="address"><i class="fas fa-home"></i> Address:</label>
+          <textarea id="address" name="address" rows="3" placeholder="Enter your full address" required></textarea>
+        </div>
+      </fieldset>
+
+      <!-- Data Usage Permission -->
+      <fieldset class="form-section">
+        <legend><i class="fas fa-shield-alt"></i> Data Usage Permission</legend>
+        <div class="form-group checkbox-group">
+          <input type="checkbox" id="dataPermission" name="dataPermission" required>
+          <label for="dataPermission">
+            I agree that all the data given by me is correct and my information can be stored and shared with potential hirers. This data will be used for security purposes and to facilitate job matching. Your personal information will be handled in accordance with applicable privacy laws.
+          </label>
+        </div>
+      </fieldset>
+      <% if(!isLoggedIn) { %>
+      <div class="alert alert-warning" role="alert">
+        You must be logged in to submit the form. Please <a href="/login" class="alert-link">log in</a> or <a href="/signup" class="alert-link">sign up</a>.
+      </div>
+      <% }else{ %>
+      <button type="submit" class="submit-btn">
+        <i class="fas fa-paper-plane"></i> Submit Registration
+      </button>
+      <% } %>
+      
+    </form>
+  </div>
+  </div>
+  </div>
+</body>
+</html>

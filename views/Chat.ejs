@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WorkZap — Chat (Hirer ↔ Applicant)</title>
+<style>
+  :root{
+    --bg:#f4f8ff;
+    --card:#ffffff;
+    --muted:#7b8093;
+    --hirer:#403d98;
+    --applicant:#0ea5e9;
+    --incoming:#eef6ff;
+    --outgoing:#f4ecff;
+    --glass: rgba(255,255,255,0.6);
+    --radius:12px;
+    --shadow: 0 6px 20px rgba(22, 28, 49, 0.08);
+    --max-width:980px;
+    --gap:14px;
+    --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  html,body{height:100%;margin:0;font-family:var(--font);background:
+    radial-gradient(800px 300px at 10% 10%, rgba(14,165,233,0.06), transparent),
+    linear-gradient(180deg,var(--bg),#f8fbff);
+    color:#111827; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+
+  .chat-shell{
+    max-width:var(--max-width);
+    margin:36px auto;
+    display:grid;
+    grid-template-columns: 320px 1fr;
+    gap:24px;
+    padding:20px;
+  }
+
+  /* Sidebar (conversations) */
+  .sidebar{
+    background:linear-gradient(180deg,var(--card),var(--glass));
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:560px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--hirer),var(--applicant));
+    display:grid;place-items:center;color:white;font-weight:700;font-size:18px;
+    box-shadow:0 6px 16px rgba(64,61,152,0.12);
+  }
+  .sb-search{
+    display:flex;align-items:center;gap:8px;margin-top:8px;
+    background:#f7f9ff;padding:8px;border-radius:10px;
+  }
+  .sb-search input{flex:1;border:none;background:transparent;outline:none;color:#0f1724;font-size:14px;}
+  .convo-list{overflow:auto;padding-right:6px;}
+  .convo{
+    display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;
+  }
+  .convo:hover{background:#f1f6ff;}
+  .convo .av{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;color:white;font-weight:700;}
+  .convo .meta{flex:1}
+  .convo .meta .title{font-weight:600}
+  .convo .meta .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .convo .badge{background:#fde68a;color:#92400e;padding:6px 8px;border-radius:999px;font-weight:600;font-size:12px}
+
+  /* Main chat card */
+  .chat-card{
+    background:linear-gradient(180deg,var(--card),#ffffff);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    min-height:560px;
+    overflow:hidden;
+  }
+
+  .chat-header{
+    padding:18px 20px;border-bottom:1px solid #f0f3ff;display:flex;align-items:center;gap:12px;
+  }
+  .chat-header .title{font-weight:700;font-size:16px}
+  .chat-header .role{color:var(--muted);font-size:13px}
+  .chat-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .icon-btn{background:none;border:none;padding:8px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:16px}
+  .icon-btn:hover{background:#fbfbff;color:var(--hirer)}
+
+  .messages{
+    padding:20px;flex:1;display:flex;flex-direction:column;gap:12px;overflow:auto;background:
+    linear-gradient(180deg, rgba(14,165,233,0.02), transparent 40%);
+  }
+
+  /* message bubbles */
+  .msg-row{display:flex;gap:12px;align-items:flex-end}
+  .msg-row.incoming{justify-content:flex-start}
+  .msg-row.outgoing{justify-content:flex-end}
+  .bubble{
+    max-width:66%;
+    padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.35;
+    box-shadow:0 4px 10px rgba(21,24,54,0.04);
+  }
+  .bubble .meta{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
+  .bubble.incoming{background:var(--incoming);border-top-left-radius:6px}
+  .bubble.outgoing{background:var(--outgoing);border-top-right-radius:6px;color:#24144d}
+
+  .avatar-small{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:white;font-weight:700}
+
+  /* typing indicator */
+  .typing{
+    display:flex;align-items:center;gap:10px;background:transparent;padding:6px 10px;border-radius:999px;color:var(--muted);
+  }
+  .dots{display:flex;gap:4px;align-items:flex-end}
+  .dot{width:7px;height:7px;border-radius:999px;background:#cbd5e1;animation:blink 1s infinite}
+  .dot:nth-child(2){animation-delay:0.12s}
+  .dot:nth-child(3){animation-delay:0.24s}
+  @keyframes blink{0%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-6px);opacity:1}100%{transform:translateY(0);opacity:0.4}}
+
+  /* composer */
+  .composer{padding:14px;border-top:1px solid #f0f3ff;display:flex;gap:10px;align-items:center}
+  .composer textarea{flex:1;resize:none;height:46px;padding:10px 12px;border-radius:10px;border:1px solid #eef3ff;background:white;outline:none;font-size:14px}
+  .composer .send-btn{background:linear-gradient(90deg,var(--hirer),var(--applicant));color:white;padding:10px 14px;border-radius:9px;border:none;cursor:pointer;font-weight:600}
+  .composer .tools{display:flex;gap:8px;align-items:center}
+  .small{font-size:13px;color:var(--muted)}
+
+  /* responsive */
+  @media (max-width:900px){
+    .chat-shell{grid-template-columns:1fr; padding:12px}
+    .sidebar{order:2}
+    .chat-card{order:1}
+  }
+</style>
+</head>
+<body>
+  
+  <div class="chat-shell" role="application" aria-label="Hirer applicant chat">
+    <aside class="sidebar" aria-label="Conversations">
+      <div class="brand">
+        <div class="logo">WZ</div>
+        <div>
+          <div style="font-weight:700">WorkZap</div>
+          <div style="font-size:13px;color:var(--muted)">Applicants — Conversations</div>
+        </div>
+      </div>
+
+      <div class="sb-search" role="search" aria-label="Search conversations">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden><path d="M21 21l-4.35-4.35" stroke="#94a3b8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <input placeholder="Search name or email" id="convSearch" />
+      </div>
+      <div class="convo-list" id="convoList" aria-live="polite">
+        <% (chattedAccount || []).forEach(function(email, idx){ %>
+          <div class="convo" data-id="<%= idx %>" onclick="selectConvo(this)">
+            <div class="av" style="background:linear-gradient(135deg,var(--applicant),#22c1c3)"><%= (email && email[0] || 'U').toUpperCase() %></div>
+            <div class="meta">
+              <div class="title"><%= email %></div>
+              <div class="sub">Conversation</div>
+            </div>
+          </div>
+        <% }) %>
+
+    </aside>
+
+    <section class="chat-card" aria-label="Conversation panel">
+      <header class="chat-header">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="avatar-small" id="headerAvatar" style="background:linear-gradient(135deg,var(--applicant),#22c1c3)">U</div>
+          <div>
+            <div class="title" id="headerTitle">Select a conversation</div>
+            <div class="role" id="headerSub">&nbsp;</div>
+          </div>
+        </div>
+
+        <div class="chat-actions">
+          <button class="icon-btn" title="Call" type="button">📞</button>
+          <button class="icon-btn" title="View profile" type="button">👤</button>
+          <button class="icon-btn" title="More" type="button">⋯</button>
+        </div>
+      </header>
+
+      <div class="messages" id="messages" tabindex="0" aria-live="polite">
+        <div class="small" style="text-align:center;color:var(--muted);margin-top:20px">No messages yet</div>
+      </div>
+
+      <form class="composer" id="composer" onsubmit="return sendMessage()">
+        <div class="tools" aria-hidden>
+          <button type="button" class="icon-btn" title="Attach file" onclick="attachFile()">📎</button>
+          <button type="button" class="icon-btn" title="Emoji" onclick="insertEmoji()">😊</button>
+        </div>
+        <textarea id="msgInput" placeholder="Write a message..." aria-label="Message input"></textarea>
+        <button type="submit" class="send-btn">Send</button>
+      </form>
+    </section>
+  </div>
+
+<script>
+  // Minimal JS: send messages, select conversation, and simulate typing
+  const messagesEl = document.getElementById('messages');
+  const input = document.getElementById('msgInput');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  function scrollToBottom(){
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  scrollToBottom();
+
+  function sendMessage(){
+    const text = input.value.trim();
+    if(!text) return false;
+    const row = document.createElement('div');
+    row.className = 'msg-row outgoing';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble outgoing';
+    bubble.setAttribute('role','article');
+    bubble.innerHTML = text + '<div class="meta"><span class="small">Now</span></div>';
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    input.value='';
+    scrollToBottom();
+    simulateReply();
+    return false;
+  }
+
+  function simulateReply(){
+    // show typing, then add a short reply (demo)
+    typingIndicator.style.display = 'flex';
+    setTimeout(()=>{
+      typingIndicator.style.display = 'none';
+      const row = document.createElement('div');
+      row.className = 'msg-row incoming';
+      const av = document.createElement('div');
+      av.className = 'avatar-small';
+      av.style.background = 'linear-gradient(135deg,var(--applicant),#22c1c3)';
+      av.textContent = 'RS';
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble incoming';
+      bubble.innerHTML = 'Thanks — noted. I’ll join at 3 PM.' + '<div class="meta"><span class="small">Now</span></div>';
+      row.appendChild(av);
+      row.appendChild(bubble);
+      messagesEl.appendChild(row);
+      scrollToBottom();
+    }, 1200);
+  }
+
+  // conversation selection stub
+  function selectConvo(arg){
+    // highlight selection and update header title
+    document.querySelectorAll('.convo').forEach(function(c){ c.style.background='transparent'; });
+    var el = null;
+    if (typeof arg === 'number' || typeof arg === 'string') {
+      el = document.querySelector('.convo[data-id="'+ arg +'"]');
+    } else {
+      el = arg; // element passed
+    }
+    if (el) {
+      el.style.background = '#eef6ff';
+      var titleEl = el.querySelector('.title');
+      var subEl = el.querySelector('.sub');
+      var name = titleEl ? titleEl.textContent : 'Conversation';
+      document.getElementById('headerTitle').textContent = name;
+      document.getElementById('headerSub').textContent = subEl ? subEl.textContent : '';
+      var av = document.getElementById('headerAvatar');
+      if (av) { av.textContent = (name && name[0] ? name[0].toUpperCase() : 'U'); }
+    }
+  }
+
+  function attachFile(){ alert('Attach file dialog (implement as needed)'); }
+  function insertEmoji(){ input.value += ' 😊'; input.focus(); }
+
+  // accessibility: send on Ctrl+Enter
+  input.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+</body>
+</html>
