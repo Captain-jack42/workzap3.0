@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="home.css">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar">
+    <%- include('partials/header', { userType: userType }) %>
+  </nav>
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>Your each Hire Fullfill other Dreams</h1>
+      <p class="hero-subtitle">Hope your company achive great success in future</p>
+      <div class="hero-buttons">
+        <a href="/worker" class="secondary-btn">Hire Talent</a>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <div class="overlay"></div>
+      <video autoplay muted loop class="hero-video">
+        <source src="/videos/video3.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <h2 class="section-title">Our Services</h2>
+    <div class="cards-container">
+      <div class="card worker-section">
+        <i class="fas fa-user-tie"></i>
+        <h3>Manage Employees</h3>
+        <p>Efficiently oversee your workforce with our comprehensive tools</p>
+        <ul class="features-list">
+          <li><i class="fas fa-check"></i> Track employee performance</li>
+          <li><i class="fas fa-check"></i> Manage schedules & attendance</li>
+          <li><i class="fas fa-check"></i> Handle leave requests</li>
+        </ul>
+        <a href="/hired" class="card-btn">Manage Now</a>
+      </div>
+      <div class="card hiring-section">
+        <i class="fas fa-users"></i>
+        <h3>Recruitment</h3>
+        <p>Streamline your hiring process and find the perfect candidates</p>
+        <ul class="features-list">
+          <li><i class="fas fa-check"></i> Post job openings</li>
+          <li><i class="fas fa-check"></i> Screen candidates efficiently</li>
+          <li><i class="fas fa-check"></i> Schedule interviews</li>
+        </ul>
+        <a href="/worker" class="card-btn">Start Hiring</a>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
