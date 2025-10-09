@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357ab8;
+      --text: #333;
+      --bg-light: #ffffffcc;
+      --bg-page: #f0f4f8;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      color: var(--text);
+      min-height: 100vh;
+      /* padding: 24px; */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-container {
+      width: 100%;
+      /* max-width: 1100px; */
+    }
+
+    .content {
+      padding: 20px;
+      width: 100%;
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .profile-container {
+      background: var(--bg-light);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      padding: 40px 30px;
+      position: relative;
+    }
+
+    .profile-img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .profile-img:hover {
+      transform: scale(1.06);
+    }
+
+    .profile-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 18px;
+    }
+
+    .profile-role {
+      font-size: 1rem;
+      color: #777;
+      margin-bottom: 18px;
+    }
+
+    .profile-bio {
+      font-size: 1rem;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-bottom: 24px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.25s ease;
+    }
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .skills {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .skills h3 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .skill {
+      margin-bottom: 10px;
+    }
+    .skill span {
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .progress {
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 8px;
+    }
+    .progress-bar {
+      background: var(--primary);
+      height: 100%;
+      width: 0;
+      animation: load 1.5s forwards;
+    }
+    .progress-bar.html { animation-delay: 0.15s; width: 85%; }
+    .progress-bar.css  { animation-delay: 0.35s; width: 80%; }
+    .progress-bar.js   { animation-delay: 0.6s; width: 90%; }
+
+    @keyframes load {
+      to { width: inherit; }
+    }
+
+    .profile-contact p {
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+    .social-links {
+      margin-top: 18px;
+    }
+    .social-links a {
+      margin: 0 8px;
+      color: var(--primary);
+      font-size: 1.3rem;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .social-links a:hover {
+      color: var(--primary-dark);
+      transform: translateY(-3px);
+    }
+
+    /* Job section styles */
+    .side-container {
+      width: 520px;
+      max-width: 520px;
+    }
+
+    .job-section {
+      background: var(--bg-light);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+      text-align: left;
+    }
+
+    .job-section h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid #e6eefb;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--primary-dark);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.18s ease, transform 0.12s ease;
+    }
+    .tab-btn.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .job-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .job-item {
+      background: #fff;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.04);
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .job-meta {
+      color: #666;
+      font-size: 0.88rem;
+      margin-top: 6px;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .small-btn {
+      background: transparent;
+      border: 1px solid #e6eefb;
+      color: var(--primary-dark);
+      padding: 6px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .small-btn.danger {
+      border-color: #f7d0d0;
+      color: #d14b4b;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .content { flex-direction: column; align-items: center; }
+      .side-container { max-width: 100%; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <%- include('partials/header') %>
+
+    <div class="content">
+      <div class="profile-container">
+        <img
+          src="<%= user.photo || 'https://th.bing.com/th/id/OIP.JttmcrrQ9_XqrY60bFEfgQHaHa?w=210&h=210&c=7&r=0&o=5&dpr=1.4&pid=1.7' %>"
+          alt="User Photo"
+          class="profile-img"
+        />
+
+        <div class="profile-name"><%= user.name || 'Unnamed User' %></div>
+        <div class="profile-role"><%= user.role || 'Full Stack Developer' %></div>
+
+        <div class="profile-bio">
+          <%= user.bio || 'Passionate about building scalable web applications and intuitive user experiences. Loves JavaScript, Node.js, and React.' %>
+        </div>
+
+        <a href="<%= user.resumeUrl || '#' %>" class="btn" target="_blank" rel="noopener">Download Resume</a>
+
+        <div class="skills">
+          <h3>Skills</h3>
+          <% (user.skills || ['HTML5','CSS3','JavaScript']).forEach(function(s, idx){ %>
+            <div class="skill">
+              <span><%= s %></span>
+              <div class="progress">
+                <div class="progress-bar <%= idx===0?'html':(idx===1?'css':'js') %>"></div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <div class="profile-contact">
+          <p><i class="fas fa-envelope"></i> <%= user.email || 'no-reply@example.com' %></p>
+          <p><i class="fas fa-phone"></i> <%= user.phone || '+91 9876543210' %></p>
+          <p><i class="fas fa-map-marker-alt"></i> <%= user.location || 'India' %></p>
+        </div>
+
+        <div class="social-links">
+          <a href="<%= user.github || '#' %>" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="<%= user.linkedin || '#' %>" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="<%= user.twitter || '#' %>" title="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+
+      <div class="side-container">
+        <div class="job-section">
+          <h3><i class="fas fa-briefcase"></i> Jobs</h3>
+
+          <div class="tabs" role="tablist" aria-label="Job tabs">
+            <button class="tab-btn active" data-tab="applied">Applied</button>
+            <button class="tab-btn" data-tab="bookmarked">Bookmarked</button>
+          </div>
+
+          <div id="applied" class="tab-panel">
+            <ul class="job-list" id="applied-list">
+              <% if (Array.isArray(user.jobsApplied) && user.jobsApplied.length) { %>
+                <% user.jobsApplied.forEach(function(job){ %>
+
+                  <li class="job-item">
+                    <div>
+                      <strong><%= job.JobTitle %></strong> at <span><%= job.Company %></span>
+                      <div class="job-meta"><i class="fas fa-calendar-check"></i> Applied on <%= job.DeadLine %></div>
+                    </div>
+                    <div class="job-actions">
+                      <a class="small-btn" href="/jobs/<%= job.id %>">View</a>
+                      <form method="POST" action="/jobs/<%= job.id %>/withdraw" style="display:inline;">
+                        <button type="submit" class="small-btn danger">Withdraw</button>
+                      </form>
+                    </div>
+                  </li>
+                <% }) %>
+              <% } else { %>
+                <li class="job-item">
+                  <div>No applied jobs yet.</div>
+                </li>
+              <% } %> 
+            </ul>
+          </div>
+
+          <div id="bookmarked" class="tab-panel" style="display:none;">
+            <ul class="job-list" id="bookmarked-list">
+              <% if (Array.isArray(user.bookmarkedJobs) && user.bookmarkedJobs.length) { %>
+                <% user.bookmarkedJobs.forEach(function(job){ %>
+                  <li class="job-item">
+                    <div>
+                      <strong><%= job.JobTitle %></strong> at <span><%= job.Company %></span>
+                      <div class="job-meta"><i class="fas fa-bookmark"></i> Saved on <%= job.DeadLine %></div>
+                    </div>
+                    <div class="job-actions">
+                      <a class="small-btn" href="/jobs/<%= job.id %>">View</a>
+                      <form method="POST" action="/jobs/<%= job.id %>/unbookmark" style="display:inline;">
+                        <button type="submit" class="small-btn">Remove</button>
+                      </form>
+                    </div>
+                  </li>
+                <% }) %>
+              <% } else { %>
+                <li class="job-item">
+                  <div>No bookmarked jobs yet.</div>
+                </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+  </div>
+  <!-- <footer class="footer"> 
+      <%- include('partials/footer') %>
+    </footer> -->
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const tab = this.getAttribute('data-tab');
+        document.getElementById('applied').style.display = tab === 'applied' ? '' : 'none';
+        document.getElementById('bookmarked').style.display = tab === 'bookmarked' ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
+    

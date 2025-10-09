@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Applicants</title>
+  <style>
+    :root{
+      --bg:#eef6fb; --card:#ffffff; --muted:#6b7280; --accent:#0f766e; --accent-2:#0ea5a1;
+      --danger:#ef4444; --success:#10b981; --glass: rgba(15,23,42,0.04);
+      --radius:12px; --gap:12px; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      color:#0b1220;
+    }
+
+    /* Page background and container */
+    html,body{height:100%;margin:0;background:
+      radial-gradient(800px 400px at 10% 10%, rgba(14,165,233,0.06), transparent),
+      linear-gradient(180deg,var(--bg),#f8fbff);-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1100px;margin:28px auto;padding:22px}
+
+    /* Header */
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .brand{display:flex;gap:14px;align-items:center}
+    .logo{
+      width:58px;height:58px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:18px;box-shadow:0 10px 30px rgba(14,165,233,0.08)
+    }
+    h1{margin:0;font-size:20px}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px}
+
+    /* Controls bar */
+    .controls{display:flex;gap:10px;align-items:center}
+    .search{
+      display:flex;align-items:center;background:var(--card);border-radius:12px;padding:8px 12px;gap:8px;border:1px solid var(--glass);
+      min-width:300px;box-shadow:0 6px 18px rgba(13,24,35,0.03)
+    }
+    .search svg{opacity:.8}
+    .search input{border:0;outline:0;background:transparent;color:inherit;width:220px;font-size:14px}
+    .select, .btn{
+      background:transparent;border:1px solid var(--glass);padding:9px 12px;border-radius:10px;color:var(--muted);cursor:pointer;font-size:14px
+    }
+    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#031124;border:0;font-weight:700;box-shadow:0 8px 30px rgba(14,165,233,0.08)}
+
+    /* Layout */
+    .layout{display:grid;grid-template-columns:1fr 380px;gap:18px}
+    .panel{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:0 8px 30px rgba(15,23,42,0.04);border:1px solid var(--glass)}
+    .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .count{font-weight:700;font-size:16px}
+    .muted-small{color:var(--muted);font-size:13px}
+
+    /* App list */
+    .app-list{display:flex;flex-direction:column;gap:12px;max-height:68vh;overflow:auto;padding-right:6px}
+    .app{
+      display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:12px;transition:transform .12s ease,box-shadow .12s ease;
+      background:linear-gradient(180deg,#fff, #fbfeff);border:1px solid rgba(7,32,52,0.03)
+    }
+    .app:hover{transform:translateY(-6px);box-shadow:0 18px 50px rgba(7,24,40,0.06)}
+    .avatar{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#ecfdf5,#eef2ff);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);font-size:18px;border:1px solid rgba(7,32,52,0.03)}
+    .meta{flex:1;min-width:0}
+    .meta h3{margin:0;font-size:16px}
+    .meta .line{font-size:13px;color:var(--muted);margin-top:6px}
+    .jobid{display:inline-block;margin-top:8px;background:#f1f8f6;color:#0b6b57;padding:6px 8px;border-radius:8px;font-size:12px;border:1px solid rgba(11,107,87,0.06)}
+    .cover-preview{margin-top:8px;color:var(--muted);font-size:13px}
+
+    /* Right column actions */
+    .actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .link{color:var(--accent);text-decoration:none;font-weight:600}
+    .status{font-size:12px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--glass);font-weight:700}
+    .status.new{color:var(--success);border-color:rgba(16,185,129,0.12);background:rgba(16,185,129,0.04)}
+    .status.reviewed{color:#2563eb;border-color:rgba(59,130,246,0.12);background:rgba(59,130,246,0.04)}
+    .status.shortlisted{color:#7c3aed;border-color:rgba(124,58,237,0.12);background:rgba(124,58,237,0.04)}
+
+    /* Detail pane */
+    .details .card{background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;padding:14px;border:1px solid var(--glass)}
+    .profile-top{display:flex;gap:12px;align-items:center}
+    .profile-avatar{width:96px;height:96px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:32px}
+    .profile-actions{display:flex;gap:8px;margin-top:12px}
+    .small-note{color:var(--muted);font-size:13px;margin-top:8px}
+
+    /* Toolbar features row inside left panel */
+    .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .chip{background:#f7fcfb;border:1px solid rgba(11,107,87,0.06);padding:6px 10px;border-radius:999px;font-size:13px;color:#0b6b57}
+
+    /* Footer quick pagination (static) */
+    .footer-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+    .pagination{display:flex;gap:8px;align-items:center}
+    .page-btn{background:transparent;border:1px solid var(--glass);padding:6px 10px;border-radius:8px;cursor:pointer}
+
+    /* Empty */
+    .empty{padding:22px;text-align:center;color:var(--muted);border-radius:10px;border:1px dashed rgba(7,32,52,0.03)}
+
+    /* Responsive */
+    @media (max-width:920px){ .layout{grid-template-columns:1fr} .search input{width:140px} .profile-avatar{width:72px;height:72px} }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">WZ</div>
+        <div>
+          <h1>Applicants</h1>
+          <div class="sub">Applicants for selected job • <span id="count">0</span> total</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search" role="search" aria-label="Search applicants">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6"/></svg>
+          <input id="q" placeholder="Search name or email" />
+        </div>
+
+        <!-- Filters / quick tools -->
+        <select id="statusFilter" class="select" aria-label="Filter by status">
+          <option value="all">All</option>
+          <option value="new">New</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="shortlisted">Shortlisted</option>
+        </select>
+
+        <button class="btn" id="downloadCsv" title="Download applicants as CSV">Export</button>
+        <button class="btn primary" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="list-header">
+          <div class="count"><span id="totalCount">0</span> applicants</div>
+          <div class="muted-small">Showing <span id="showingCount">0</span></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="chip">Quick actions</div>
+          <button class="btn" id="bulkShortlist">Shortlist selected</button>
+          <button class="btn" id="clearSelection">Clear selection</button>
+          <div style="margin-left:auto" class="muted-small">Sort: <select id="sortBy" class="select"><option value="recent">Most recent</option><option value="name">Name A–Z</option></select></div>
+        </div>
+
+        <div class="app-list" id="list" aria-live="polite">
+          <!-- items rendered by JS -->
+        </div>
+
+        <div id="empty" class="empty" hidden>No applicants found</div>
+
+        <div class="footer-actions">
+          <div class="muted-small">Tip: Click an applicant to see details</div>
+          <div class="pagination">
+            <button class="page-btn">&laquo; Prev</button>
+            <button class="page-btn">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">Next &raquo;</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel details">
+        <div class="card">
+          <div id="details" style="min-height:160px;text-align:center;color:var(--muted)">Select an applicant to view details</div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted-small">Total applicants</div>
+              <div style="font-weight:800;font-size:18px;margin-top:6px" id="kpiTotal">0</div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted-small">With resume</div>
+              <div style="font-weight:800;font-size:18px;margin-top:6px" id="kpiResume">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="small-note">Use Export to download a CSV. Use the selection controls in the list to update multiple applicants quickly.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- server data injection (unchanged logic) -->
+  <script type="application/json" id="server-data">
+    <%- JSON.stringify(applications || []) %>
+  </script>
+
+<script>
+  /* Original JavaScript logic preserved exactly as requested.
+     Small additions below wire the new buttons to existing behaviors
+     but do not change filtering/render logic. */
+
+  const raw = document.getElementById('server-data').textContent;
+  let applicants = [];
+  try { applicants = JSON.parse(raw || '[]'); } catch(e) { applicants = []; console.error('parse error', e); }
+  const listEl = document.getElementById('list');
+  const detailsEl = document.getElementById('details');
+  const emptyEl = document.getElementById('empty');
+  document.getElementById('count').textContent = applicants.length;
+  document.getElementById('totalCount').textContent = applicants.length;
+  document.getElementById('kpiTotal').textContent = applicants.length;
+  document.getElementById('kpiResume').textContent = applicants.filter(a=>a.resume).length;
+
+  const esc = s => s ? String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])) : '';
+
+  function renderList(data){
+    listEl.innerHTML = '';
+    if(!data.length){ emptyEl.hidden = false; return; } emptyEl.hidden = true;
+    data.forEach(a=>{
+      const div = document.createElement('div');
+      div.className = 'app';
+      div.dataset.id = a._id;
+      div.innerHTML = `
+        <div class="avatar">${esc(a.fullName || 'U').split(' ').map(x=>x[0]).slice(0,2).join('')}</div>
+        <div class="meta">
+          <h3>${esc(a.fullName || 'Unknown')}</h3>
+          <div class="line">${esc(a.email || '—')} • ${esc(a.phone || '—')}</div>
+          <div class="jobid">JobId: ${esc(a.JobId || '')}</div>
+          <div class="cover-preview">${esc(a.cover ? (a.cover.length>120? a.cover.slice(0,120)+'…': a.cover) : '')}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="status ${a.status || ''}">${esc(a.status || 'new')}</div>
+          <div style="margin-top:8px;font-size:12px;color:var(--muted)">Applied: ${a.appliedAt ? new Date(a.appliedAt).toLocaleDateString() : '—'}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <form method="POST" action="/applicant/view" style="margin:0">
+              <input type="hidden" name="appId" value="${esc(a._id)}">
+              <button class="btn" type="submit">Open</button>
+            </form>
+            ${ a.resume ? `<a class="link" href="${esc(a.resume)}" target="_blank">View resume</a>` : `<div class="muted-small">No resume</div>` }
+            <label style="margin-top:6px;font-size:13px"><input type="checkbox" class="select-app" data-id="${esc(a._id)}"> Select</label>
+
+            <!-- quick action forms (non-invasive) -->
+            <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+              <form method="POST" action="/applicant/hire" style="margin:0">
+                <input type="hidden" name="appId" value="${esc(a._id)}"/>
+                <button class="btn" type="submit">Hire</button>
+              </form>
+              <form method="POST" action="/applicant/reject" style="margin:0">
+                <input type="hidden" name="appId" value="${esc(a._id)}"/>
+                <button class="btn" type="submit">Reject</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      `;
+      div.addEventListener('click', ()=> showDetails(a));
+      listEl.appendChild(div);
+    });
+    document.getElementById('showingCount').textContent = data.length;
+  }
+
+  function showDetails(a){
+    detailsEl.innerHTML = `
+      <div class="profile-top">
+        <div class="profile-avatar">${esc((a.fullName||'U').split(' ').map(x=>x[0]).slice(0,2).join(''))}</div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:18px">${esc(a.fullName || 'Unknown')}</div>
+          <div style="color:var(--muted);margin-top:6px">${esc(a.email || '')} • ${esc(a.phone || '')}</div>
+          <div style="margin-top:8px" class="jobid">JobId: ${esc(a.JobId || '')}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <div>
+          <div class="label">Status</div>
+          <div class="value" style="margin-top:6px">${esc(a.status||'new')}</div>
+        </div>
+        <div>
+          <div class="label">Applied</div>
+          <div class="value" style="margin-top:6px">${a.appliedAt ? new Date(a.appliedAt).toLocaleString() : '—'}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="label">Resume</div>
+        <div style="margin-top:8px">
+          ${ a.resume ? `<a class="btn primary" href="${esc(a.resume)}" target="_blank">Open resume</a>` : `<div class="muted-small">No resume provided</div>` }
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="label">Cover note</div>
+        <div class="cover" style="margin-top:8px">${esc(a.cover || '—')}</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <form method="POST" action="/applicant/mark-reviewed" style="margin:0">
+          <input type="hidden" name="appId" value="${esc(a._id)}"/>
+          <button class="btn" type="submit">Mark reviewed</button>
+        </form>
+        <form method="POST" action="/applicant/shortlist" style="margin:0">
+          <input type="hidden" name="appId" value="${esc(a._id)}"/>
+          <button class="btn primary" type="submit">Shortlist</button>
+        </form>
+
+        <!-- New Hire and Reject actions -->
+        <form method="POST" action="/applicant/hire" style="margin:0">
+          <input type="hidden" name="appId" value="${esc(a._id)}"/>
+          <button class="btn" type="submit">Hire</button>
+        </form>
+        <form method="POST" action="/applicant/reject" style="margin:0">
+          <input type="hidden" name="appId" value="${esc(a._id)}"/>
+          <button class="btn" type="submit">Reject</button>
+        </form>
+
+        <!-- Start Chat action -->
+        <form method="POST" action="/startChat" style="margin:0">
+          <input type="hidden" name="email" value="${esc(a.email)}"/>
+          <button class="btn" type="submit">Start Chat</button>
+        </form>
+      </div>
+    `;
+  }
+
+  // search (unchanged logic)
+  document.getElementById('q').addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    const filtered = applicants.filter(a => (a.fullName||'').toLowerCase().includes(q) || (a.email||'').toLowerCase().includes(q));
+    renderList(filtered);
+  });
+
+  // selection helpers (wiring new UI checkboxes to existing behavior)
+  document.getElementById('downloadCsv').addEventListener('click', () => {
+    const rows = applicants.map(a => [a._id, a.fullName, a.email, a.phone, (a.resume||''), (a.cover||'')]);
+    const csv = ['id,name,email,phone,resume,cover', ...rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'applicants.csv'; a.click(); URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('bulkShortlist').addEventListener('click', () => {
+    document.querySelectorAll('.select-app:checked').forEach(cb=>{
+      const id = cb.dataset.id;
+      const item = applicants.find(a=>a._id === id);
+      if(item) item.status = 'shortlisted';
+    });
+    renderList(applicants);
+  });
+
+  // new bulk hire action
+  const bulkHireBtn = document.getElementById('bulkHire');
+  if(bulkHireBtn){
+    bulkHireBtn.addEventListener('click', () => {
+      document.querySelectorAll('.select-app:checked').forEach(cb=>{
+        const id = cb.dataset.id;
+        const item = applicants.find(a=>a._id === id);
+        if(item) item.status = 'hired';
+      });
+      renderList(applicants);
+    });
+  }
+
+  // new bulk reject action
+  const bulkRejectBtn = document.getElementById('bulkReject');
+  if(bulkRejectBtn){
+    bulkRejectBtn.addEventListener('click', () => {
+      document.querySelectorAll('.select-app:checked').forEach(cb=>{
+        const id = cb.dataset.id;
+        const item = applicants.find(a=>a._id === id);
+        if(item) item.status = 'rejected';
+      });
+      renderList(applicants);
+    });
+  }
+
+  document.getElementById('clearSelection').addEventListener('click', () => {
+    document.querySelectorAll('.select-app').forEach(cb => cb.checked = false);
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', ()=> location.reload());
+
+  // initial render (unchanged)
+  renderList(applicants);
+</script>
+
+</body>
+</html>

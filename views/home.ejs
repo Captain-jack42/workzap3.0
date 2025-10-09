@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="home.css">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>Empowering India's Workforce</h1>
+      <p class="hero-subtitle">Connecting talent with opportunities for a brighter future</p>
+      <div class="hero-buttons">
+        <% if(userType === 'hirer'){ %>
+            <a href="/host" class="primary-btn">Hire Talent</a>
+            <% }else{%>
+              <a href="/joblisting" class="primary-btn">Find Work</a>
+            <% } %>
+        
+      </div>
+    </div>
+
+    <%- include('partials/successPopup') %>
+
+<% if (showPopup) { %>
+  <script>showSuccessPopup();
+  </script>
+<% } %>
+
+
+
+    <div class="hero-media">
+      <div class="overlay"></div>
+      <video autoplay muted loop class="hero-video">
+        <source src="/videos/video1.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  
+
+  <main class="main-content">
+    <h2 class="section-title">What We Offer</h2>
+    <div class="cards-container">
+       <% if(userType === 'hirer'){ %>
+            <div class="card hiring-section">
+        <i class="fas fa-users"></i>
+        <h3>Hire Talent</h3>
+        <p>Connect with pre-vetted professionals for your business needs</p>
+        <ul class="features-list">
+          <li><i class="fas fa-check"></i> Access skilled workforce</li>
+          <li><i class="fas fa-check"></i> Streamlined hiring</li>
+          <li><i class="fas fa-check"></i> Quality guaranteed</li>
+        </ul>
+        <a href="/postjob" class="card-btn">Post a Job</a>
+      </div>
+
+      <div class="card hiring-section">
+        <i class="fas fa-users"></i>
+        <h3>Recruitment</h3>
+        <p>Streamline your hiring process and find the perfect candidates</p>
+        <ul class="features-list">
+          <li><i class="fas fa-check"></i> Post job openings</li>
+          <li><i class="fas fa-check"></i> Screen candidates efficiently</li>
+          <li><i class="fas fa-check"></i> Schedule interviews</li>
+        </ul>
+        <a href="/worker" class="card-btn">Start Hiring</a>
+      </div>
+            <% }else{%>
+             <div class="card worker-section">
+        <i class="fas fa-user-tie"></i>
+        <h3>Find Work</h3>
+        <p>Discover opportunities that match your skills and experience</p>
+        <ul class="features-list">
+          <li><i class="fas fa-check"></i> Browse thousands of jobs</li>
+          <li><i class="fas fa-check"></i> Easy application process</li>
+          <li><i class="fas fa-check"></i> Career growth support</li>
+        </ul>
+        <a href="/home/form" class="card-btn">Get Started</a>
+      </div>
+            <% } %>
+      
+      
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>
