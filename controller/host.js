@@ -258,39 +258,50 @@ exports.getDashboard = (req, res, next) => {
   const sessionUser = req.session.user;
 
   if (!sessionUser || !sessionUser.email) {
+    console.error("Session missing or malformed:", req.session);
     return res.status(401).send("Unauthorized: No user session found");
   }
 
-  // Refresh user from database to ensure latest data
   User.fetchAll()
     .then(accounts => {
       const matchedAccount = accounts.find(acc => acc.email === sessionUser.email);
       if (!matchedAccount) {
+        console.error("User not found for email:", sessionUser.email);
         return res.status(404).send("User not found");
       }
 
-      req.session.user = matchedAccount; // Sync session with latest data
+      req.session.user = matchedAccount;
 
       Job.fetchAll()
         .then(allJobs => {
-          const postedJobIds = (matchedAccount.postedJobs ?? []).map(id => id.toString());
-          const postedJobs = allJobs.filter(job =>
-            postedJobIds.includes(job._id.toString())
-          );
+          const postedJobIds = Array.isArray(matchedAccount.postedJobs)
+            ? matchedAccount.postedJobs.map(id => id.toString())
+            : [];
 
-          const hiredWorkerIds = (matchedAccount.hiredWorkers ?? []).map(id => id.toString());
+          const postedJobs = allJobs.filter(job =>
+            postedJobIds.includes(job._id?.toString())
+          );
 
           Worker.fetchAll()
             .then(allWorkers => {
+              const hiredWorkerIds = Array.isArray(matchedAccount.hiredWorkers)
+                ? matchedAccount.hiredWorkers.map(id => id.toString())
+                : [];
+
               const hiredWorkers = allWorkers.filter(worker =>
-                hiredWorkerIds.includes(worker._id.toString())
+                hiredWorkerIds.includes(worker._id?.toString())
               );
 
-              res.render('dashboard', {
-                user: matchedAccount,
-                PostedJob: postedJobs,
-                hiredWorkers: hiredWorkers
-              });
+              try {
+                res.render('dashboard', {
+                  user: matchedAccount,
+                  PostedJob: postedJobs,
+                  hiredWorkers: hiredWorkers
+                });
+              } catch (renderErr) {
+                console.error("Render error:", renderErr);
+                res.status(500).send("Failed to render dashboard");
+              }
             })
             .catch(err => {
               console.error("Error fetching workers:", err);
@@ -307,6 +318,7 @@ exports.getDashboard = (req, res, next) => {
       res.status(500).send("Failed to load user");
     });
 };
+
 
 exports.getPayroll =(req,res,next)=>{
   res.render('Payroll');
@@ -621,4 +633,5 @@ exports.postSendMsg =(req,res,next)=>{
   });
 
   
+
 }
