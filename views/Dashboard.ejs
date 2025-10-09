@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <%- include('partials/header', { user: user, userType: userType }) %>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <!-- <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-briefcase"></i>
+                <h2>WorkForce</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/host" class=""><i class="fas fa-home"></i> Host-home</a>
+                <a href="/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/payroll"><i class="fas fa-users"></i> Payroll</a>
+                <a href="/report"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="/setting"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside> -->
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <!-- <header class="dashboard-header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search employees...">
+                </div>
+                <div class="header-actions">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="user-profile">
+                        <img src="https://th.bing.com/th/id/OIP.g3Q4NOIaEpPD7r_gFgHzOwAAAA?w=201&h=201&c=7&r=0&o=5&dpr=1.4&pid=1.7" alt="Admin Profile">
+                        <span>
+                            <%= user.name %>
+                        </span>
+                    </div>
+                </div>
+            </header> -->
+
+            <!-- Dashboard Overview -->
+            <section class="dashboard-overview">
+                <div class="stats-card">
+                    <i class="fas fa-user-tie"></i>
+                    <div class="stats-info">
+                        <h3>Total Employees</h3>
+                        <p class="stats-number"><%- hiredWorkers.length %></p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-briefcase"></i>
+                    <div class="stats-info">
+                        <h3>Active Posted Job</h3>
+                        <p class="stats-number"><%- PostedJob.length %></p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stats-info">
+                        <h3>Hours Worked</h3>
+                        <p class="stats-number">2,450</p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stats-info">
+                        <h3>Performance</h3>
+                        <p class="stats-number">92%</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Employee List -->
+            <section class="employee-list">
+                <div class="section-header">
+                    <h2>Hired Employees</h2>
+                    <div class="filter-options">
+                        <select>
+                            <option value="">All Departments</option>
+                            <option value="tech">Technology</option>
+                            <option value="hr">HR</option>
+                            <option value="sales">Sales</option>
+                        </select>
+                        <button class="filter-btn">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="employee-grid">
+                    <% if( hiredWorkers.length === 0 ){ %>
+                        <p>No employees hired yet.</p>  
+                    <% }else { %> 
+                        <% hiredWorkers.forEach(employee => { %>
+                        <div class="employee-card">
+                            <div class="employee-header">
+                                <img src="https://th.bing.com/th/id/OIP.g3Q4NOIaEpPD7r_gFgHzOwAAAA?w=201&h=201&c=7&r=0&o=5&dpr=1.4&pid=1.7" alt="Employee Photo">
+                                <div class="employee-status active"></div>
+                            </div>
+                            <div class="employee-info">
+                                <h3>
+                                    <%= employee.name %>
+                                    </h3>
+                                <p class="designation"><%= employee.proffesion %></p>
+                                <div class="employee-details">
+                                    <p><i class="fas fa-id-badge"></i> ID: <%= employee._id  %></p>
+                                    <p><i class="fas fa-user-circle"></i> ID: <%= employee.fullName  %></p>
+                                    <p><i class="fas fa-briefcase"></i> Experience: <%= employee.experience %> years</p>
+                                    <p><i class="fas fa-tools"></i> Skills: <%= employee.skills %></p>
+                                </div>
+                                <div class="employee-actions">
+                                    <button class="action-btn view-btn">
+                                        <i class="fas fa-eye"></i> View Profile
+                                    </button>
+                                    <button class="action-btn message-btn">
+                                        <i class="fas fa-envelope"></i> Message
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } %>
+
+                </div>
+            </section>
+
+            <!-- Posted Job-->
+
+                        <section class="employee-list">
+                <div class="section-header">
+                    <h2>PostedJob</h2>
+                    <div class="filter-options">
+                        <select>
+                            <option value="">All Departments</option>
+                            <option value="tech">Technology</option>
+                            <option value="hr">HR</option>
+                            <option value="sales">Sales</option>
+                        </select>
+                        <button class="filter-btn">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="employee-grid">
+                    <% if( PostedJob.length === 0 ){ %>
+                        <p>No Job Posted yet.</p>  
+                    <% }else { %> 
+                        <% PostedJob.forEach(Job => { %>
+                        <div class="employee-card">
+                            <!-- <div class="employee-header">
+                                <img src="https://th.bing.com/th/id/OIP.g3Q4NOIaEpPD7r_gFgHzOwAAAA?w=201&h=201&c=7&r=0&o=5&dpr=1.4&pid=1.7" alt="Employee Photo">
+                                <div class="employee-status active"></div>
+                            </div> -->
+                            <div class="employee-info">
+                                
+                                <h3><%= Job.JobTitle %></h3>
+                                <p class="designation">Company : <%= Job.Company %></p>
+                                <div class="employee-details">
+                                    <p><i class="fas fa-id-badge"></i> DeadLine: <%= Job.DeadLine  %></p>
+                                    <p><i class="fas fa-user-circle"></i> Salary: <%= Job.SalaryRange  %></p>
+                                    <p><i class="fas fa-briefcase"></i> Location: <%= Job.Location %> </p>
+                                    <p><i class="fas fa-tools"></i> Type: <%= Job.JobType %></p>
+                                </div>
+                                <div class="employee-actions">
+                                    <!-- inside your job card partial (EJS) -->
+                                        <form method="POST" action="/applicants" class="inline-form">
+                                            <input type="hidden" name="jobId" value="<%= Job._id %>">
+                                                <button type="submit" class="action-btn view-btn">
+                                                    <i class="fas fa-eye"></i> Applicants
+                                                </button>
+                                        </form>
+
+                                    <button class="action-btn message-btn">
+                                        <i class="fas fa-envelope"></i> Edit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } %>
+
+                </div>
+            </section>
+
+
+            <!-- Recent Activity -->
+            <section class="recent-activity">
+                <h2>Recent Activity</h2>
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon"><i class="fas fa-user-plus"></i></div>
+                        <div class="activity-details">
+                            <p>New employee John Doe joined the team</p>
+                            <span class="activity-time">2 hours ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon"><i class="fas fa-project-diagram"></i></div>
+                        <div class="activity-details">
+                            <p>Project "Website Redesign" assigned to team</p>
+                            <span class="activity-time">5 hours ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="activity-details">
+                            <p>Performance review completed for Q2</p>
+                            <span class="activity-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

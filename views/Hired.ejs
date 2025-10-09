@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hired Worker Details</title>
+
+  <!-- Font Awesome (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <style>
+    /* Embedded Hired.css — single-file, responsive, modern card UI */
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#98a2b3;
+      --accent:#60a5fa;
+      --accent-2:#7ee7b7;
+      --glass: rgba(255,255,255,0.03);
+      --radius:14px;
+      --max-width:1200px;
+      --gap:20px;
+      --shadow: 0 10px 30px rgba(2,6,23,0.6);
+      --glass-border: rgba(255,255,255,0.04);
+      font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:
+      radial-gradient(800px 400px at 10% 10%, rgba(96,165,250,0.04), transparent 8%),
+      radial-gradient(700px 350px at 90% 90%, rgba(126,231,183,0.02), transparent 8%),
+      var(--bg);color:#e6eef6;-webkit-font-smoothing:antialiased}
+
+    /* layout */
+    .page-container{max-width:var(--max-width);margin:32px auto;padding:24px;display:block}
+    .header{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+    .header h1{font-size:1.6rem;margin:0;display:flex;align-items:center;gap:12px}
+    .header h1 i{color:var(--accent-2);transform:translateY(-1px)}
+    .header p{margin:0;color:var(--muted)}
+
+    /* search */
+    .search-filter{display:flex;justify-content:flex-end;margin-bottom:18px}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--glass-border);padding:10px 14px;border-radius:12px;min-width:260px}
+    .search-box i{color:var(--muted);font-size:14px}
+    .search-box input{background:transparent;border:0;color:#eaf6ff;outline:none;font-size:14px;min-width:160px}
+
+    /* grid of workers */
+    .workers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap)}
+    @media (max-width:1100px){.workers-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:700px){.workers-grid{grid-template-columns:1fr}}
+
+    /* card */
+    .worker-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:var(--radius);padding:14px;border:1px solid var(--glass-border);box-shadow:var(--shadow);display:flex;gap:14px;align-items:flex-start;transition:transform .16s ease,box-shadow .16s ease}
+    .worker-card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(2,6,23,0.75)}
+
+    /* left column: image + status */
+    .worker-header{position:relative;flex:0 0 120px;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .worker-image{width:100px;height:100px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+    .worker-image img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* status badge */
+    .status-badge{position:absolute;right:8px;top:8px;background:linear-gradient(90deg,#22c55e,#16a34a);color:#052014;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid rgba(0,0,0,0.15)}
+
+    /* main info */
+    .worker-info{flex:1;display:flex;flex-direction:column;gap:8px}
+    .worker-name{margin:0;display:flex;align-items:center;gap:10px;font-size:1.05rem;color:#e9f6ff}
+    .gender-badge{font-size:0.85rem;color:var(--muted);background:rgba(255,255,255,0.02);padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);display:inline-flex;align-items:center;gap:6px}
+
+    /* role, experience, location, salary */
+    .worker-role,.experience-bar,.worker-footer{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.92rem}
+    .worker-role i,.experience-bar i,.worker-footer i{color:var(--accent-2);min-width:16px}
+    .worker-footer{justify-content:space-between;margin-top:6px}
+
+    /* skills */
+    .skills-container h3{margin:6px 0;color:#dff5ff;font-size:0.95rem}
+    .skills-grid{display:flex;flex-wrap:wrap;gap:8px}
+    .skill-tag{background:linear-gradient(90deg,rgba(255,255,255,0.02),transparent);padding:6px 10px;border-radius:999px;font-size:0.82rem;color:var(--muted);border:1px solid rgba(255,255,255,0.03)}
+
+    /* contact button */
+    .contact-btn{align-self:flex-start;margin-top:8px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042630;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 26px rgba(96,165,250,0.08)}
+    .contact-btn i{font-size:14px}
+
+    /* small details and responsiveness */
+    .small{font-size:0.85rem;color:var(--muted)}
+    footer{margin-top:26px;color:var(--muted);text-align:center;padding:14px 0}
+
+    /* placeholder for empty state */
+    .empty {text-align:center;padding:36px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);color:var(--muted)}
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="page-container">
+    <header class="header" role="banner">
+      <h1><i class="fas fa-users-gear"></i> Hired Worker Details</h1>
+      <p>Meet our talented team members who are making a difference</p>
+    </header>
+
+    <div class="search-filter" role="search">
+      <div class="search-box" aria-label="Search workers">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input id="searchInput" type="text" placeholder="Search workers by name, skill, or role..." aria-label="Search workers by name, skill, or role">
+      </div>
+    </div>
+
+    <div id="workersGrid" class="workers-grid" aria-live="polite">
+      <% if (!matchedAccounts || matchedAccounts.length === 0) { %>
+        <div class="empty">No workers found. Try a different search or check back later.</div>
+      <% } else { %>
+        <% matchedAccounts.forEach(Id => { %>
+          <div class="worker-card" data-name="<%= (Id.fullName || '').toLowerCase() %>" data-skills="<%= (Id.skills || '').toLowerCase() %>" data-role="<%= (Id.profession || '').toLowerCase() %>">
+            <div class="worker-header">
+              <div class="worker-image" aria-hidden="true">
+                <img src="<%= Id.profileImagePath ? Id.profileImagePath.replace(/\\/g, '/') : '/images/default-profile.jpg' %>" alt="Profile photo of <%= Id.fullName %>">
+              </div>
+              <div class="status-badge" aria-hidden="true"><%= Id.status || 'Active' %></div>
+            </div>
+
+            <div class="worker-info">
+              <h2 class="worker-name">
+                <%= Id.fullName || 'Unnamed' %>
+                <span class="gender-badge" title="Gender">
+                  <i class="fas <%= (Id.gender || '').toLowerCase() === 'male' ? 'fa-mars' : ((Id.gender || '').toLowerCase() === 'female' ? 'fa-venus' : 'fa-circle') %>"></i>
+                  <%= Id.gender || 'N/A' %>
+                </span>
+              </h2>
+
+              <div class="worker-role">
+                <i class="fas fa-briefcase" aria-hidden="true"></i>
+                <span><%= Id.profession || 'Profession not set' %></span>
+              </div>
+
+              <div class="experience-bar">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <span>Experience: <%= Id.experience || 'Not specified' %></span>
+              </div>
+
+              <div class="skills-container" aria-label="Skills">
+                <h3><i class="fas fa-tools" aria-hidden="true"></i> Skills</h3>
+                <div class="skills-grid">
+                  <% (Id.skills || '').split(',').filter(s => s.trim()).slice(0,8).forEach(skill => { %>
+                    <span class="skill-tag"><%= skill.trim() %></span>
+                  <% }) %>
+                </div>
+              </div>
+
+              <div class="worker-footer" aria-hidden="true">
+                <div class="location"><i class="fas fa-location-dot"></i><span><%= Id.location || 'Location not set' %></span></div>
+                <div class="salary"><i class="fas fa-money-bill-wave"></i><span><%= Id.salary || 'Not disclosed' %></span></div>
+              </div>
+
+              <button class="contact-btn" type="button" aria-label="Contact <%= Id.fullName %>" data-email="<%= Id.email || '' %>" data-id="<%= Id._id %>">
+                <i class="fas fa-envelope"></i> Contact Worker
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+<!-- 
+  <footer>
+    <%- include('partials/footer') %>
+  </footer> -->
+
+  <script>
+    // Client-side: search filter and contact-button behavior
+    (function(){
+      const searchInput = document.getElementById('searchInput');
+      const grid = document.getElementById('workersGrid');
+
+      function normalize(s){ return (s || '').toLowerCase(); }
+
+      searchInput.addEventListener('input', function(){
+        const q = normalize(this.value.trim());
+        const cards = grid.querySelectorAll('.worker-card');
+        let visible = 0;
+        cards.forEach(card => {
+          const name = card.getAttribute('data-name') || '';
+          const skills = card.getAttribute('data-skills') || '';
+          const role = card.getAttribute('data-role') || '';
+          const match = !q || name.includes(q) || skills.includes(q) || role.includes(q);
+          card.style.display = match ? '' : 'none';
+          if(match) visible++;
+        });
+        // show empty state if none visible
+        const empty = grid.querySelector('.empty');
+        if(visible === 0 && !empty){
+          const div = document.createElement('div');
+          div.className = 'empty';
+          div.textContent = 'No workers match your search.';
+          grid.appendChild(div);
+        } else if(visible > 0 && empty){
+          empty.remove();
+        }
+      });
+
+      // Contact button behavior: open mailto or trigger modal/fetch
+      grid.addEventListener('click', function(e){
+        const btn = e.target.closest('.contact-btn');
+        if(!btn) return;
+        const email = btn.dataset.email;
+        const id = btn.dataset.id;
+        if(email){
+          // open user's email client while preserving id in subject for backend reference
+          const subject = encodeURIComponent('Inquiry about your profile (ID: ' + id + ')');
+          window.location.href = 'mailto:' + encodeURIComponent(email) + '?subject=' + subject;
+          return;
+        }
+
+        // Fallback: trigger a simple prompt to collect an email and message, then POST to /contact-worker
+        const from = prompt('Enter your email so the worker can respond:');
+        if(!from) return;
+        const message = prompt('Write a short message to the worker:');
+        if(message === null) return;
+
+        fetch('/contact-worker', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({workerId: id, from, message})
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data && data.success ? 'Message sent' : 'Failed to send message');
+        })
+        .catch(()=> alert('Failed to send message'));
+      });
+    })();
+  </script>
+</body>
+</html>

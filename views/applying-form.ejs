@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Job — Details & Apply</title>
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#9aa4b2;
+      --accent:#6ee7b7;
+      --accent-2:#60a5fa;
+      --glass: rgba(255,255,255,0.04);
+      --radius:12px;
+      --max:1100px;
+      --card-pad:28px;
+      --shadow: 0 6px 24px rgba(2,6,23,0.6);
+      --focus: 0 0 0 4px rgba(96,165,250,0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{height:100%;margin:0;background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(96,165,250,0.06), transparent 8%),
+      radial-gradient(900px 500px at 90% 90%, rgba(110,231,183,0.03), transparent 8%),
+      var(--bg);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{max-width:var(--max);margin:40px auto;padding:20px;display:grid;grid-template-columns:1fr 420px;gap:28px;}
+    @media (max-width:980px){ .wrap{grid-template-columns:1fr; padding:16px; margin:20px auto;} }
+
+    .job-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:var(--radius);
+      padding:var(--card-pad);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .job-header{
+      display:flex;gap:16px;align-items:center;margin-bottom:18px;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#04263a;
+      box-shadow: 0 6px 18px rgba(6,12,24,0.6);
+      flex:0 0 64px;
+    }
+    .job-title{display:flex;flex-direction:column;gap:4px;}
+    .job-title h1{margin:0;font-size:20px;letter-spacing:-0.2px;}
+    .meta{color:var(--muted);font-size:13px;}
+
+    .tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+    .tag{background:var(--glass);color:var(--muted);padding:6px 10px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,0.03);}
+
+    .section{margin-top:18px;}
+    .section h3{margin:0 0 10px 0;font-size:15px;color:#dfefff;}
+    .desc{color:var(--muted);line-height:1.5;font-size:14px}
+
+    .apply-card{
+      position:sticky;top:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
+      box-shadow:var(--shadow);
+    }
+    
+
+    form{display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;color:#cfe7ff}
+    input[type="text"],input[type="email"],input[type="tel"],select,textarea{
+      background: rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:10px 12px;border-radius:10px;color:#eaf6ff;
+      outline:none;font-size:14px;
+    }
+    input:focus,select:focus,textarea:focus{box-shadow:var(--focus);border-color:rgba(96,165,250,0.5)}
+    textarea{min-height:100px;resize:vertical}
+
+    .row{display:flex;gap:12px}
+    .row .col{flex:1}
+
+    .file-drop{
+      border:2px dashed rgba(255,255,255,0.04);
+      padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .file-meta{display:flex;align-items:center;gap:12px}
+    .file-btn{
+      background:linear-gradient(90deg,var(--accent-2),var(--accent));
+      color:#072630;padding:8px 12px;border-radius:10px;border:none;font-weight:600;cursor:pointer;
+    }
+    .file-preview{font-size:13px;color:#dffcf0}
+
+    .skills-input{display:flex;flex-wrap:wrap;gap:8px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+    .skill-pill{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;color:var(--muted);font-size:13px;border:1px solid rgba(255,255,255,0.02)}
+
+    .actions{display:flex;gap:10px;margin-top:6px}
+    .btn-primary{
+      flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042630;font-weight:700;cursor:pointer;
+      box-shadow: 0 8px 26px rgba(96,165,250,0.08);
+    }
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:12px;border-radius:10px;cursor:pointer}
+
+    .note{font-size:13px;color:var(--muted);margin-top:6px}
+
+    .small{font-size:13px;color:var(--muted)}
+
+    /* subtle animations */
+    .fade-in{animation:fade .38s ease both}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <main class="wrap fade-in" aria-label="Job detail and application page">
+    <!-- LEFT: Job Details -->
+    <section class="job-card" aria-labelledby="job-name">
+      <header class="job-header">
+        <div class="logo" aria-hidden="true">WF</div>
+        <div class="job-title">
+          <h1 id="job-name">Senior Full Stack Developer</h1>
+          <div class="meta">Acme Labs • Remote • Full-time • Posted 5 days ago</div>
+          <div class="tags" aria-hidden="true">
+            <span class="tag">JavaScript</span>
+            <span class="tag">React</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">MongoDB</span>
+            <span class="tag">AWS</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="section">
+        <h3>About the role</h3>
+        <p class="desc">Lead development of customer-facing web applications, own the full delivery lifecycle, and raise the bar on performance, accessibility, and testability. You will collaborate closely with product and design to ship delightful features at scale.</p>
+      </div>
+
+      <div class="section">
+        <h3>Responsibilities</h3>
+        <ul class="desc" style="margin:8px 0 0 18px">
+          <li>Design and build scalable REST and GraphQL APIs.</li>
+          <li>Ship high-quality React components with strong UX and accessibility.</li>
+          <li>Mentor junior engineers and lead code reviews.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h3>Minimum qualifications</h3>
+        <ul class="desc" style="margin:8px 0 0 18px">
+          <li>3+ years production experience with React and Node.js.</li>
+          <li>Strong fundamentals in algorithms, databases, and HTTP.</li>
+          <li>Comfortable with Git, CI/CD and cloud deployments.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h3>Perks</h3>
+        <p class="desc">Competitive salary, remote-first culture, flexible PTO, learning stipend, hardware budget, and monthly team stipends.</p>
+      </div>
+    </section>
+
+    <!-- RIGHT: Apply form -->
+    <aside class="apply-card" aria-labelledby="apply-heading">
+      <h2 id="apply-heading" style="margin:0 0 10px 0">Apply for this job</h2>
+
+      <form id="applyForm" method="POST" action="/submitApplication"  >
+        <!-- include job id to attach on submit -->
+        <!-- <input type="hidden" name="jobId" value="job_ABC123" /> -->
+
+        <label for="fullname"><strong>JobId</strong></label>
+            <input id="fullname" name="JobId" type="text" value="<%- jobId %>" readonly required />
+
+        <div class="row">
+          
+          <div class="col">
+            <label for="fullname"><strong>Full name</strong></label>
+            <input id="fullname" name="name" type="text" placeholder="Rajan Singh" required />
+          </div>
+          <div class="col">
+            <label for="phone"><strong>Phone</strong></label>
+            <input id="phone" name="phone" type="tel" placeholder="+91 9XXXXXXXXX" inputmode="tel" required />
+          </div>
+        </div>
+
+        <label for="email"><strong>Email</strong></label>
+        <input type="email" id="email" name="email" placeholder="<%= email %>" value="<%= email %>" readonly >
+
+
+        <label><strong>Resume</strong></label>
+        <input id="resume" name="resume" type="url" placeholder="www.googledrive.rajan-resume.com" required />
+
+
+        <label for="cover"><strong>Cover letter</strong></label>
+        <textarea id="cover" name="cover" placeholder="A short note on why you're a fit" maxlength="1200"></textarea>
+
+        <div class="actions">
+          <button type="button" class="btn-ghost" id="saveDraft">Save draft</button>
+          <button type="submit" class="btn-primary" id="submitBtn">Submit application</button>
+        </div>
+
+        <div class="note" id="formNote">We’ll send you a confirmation email after successful submission.</div>
+      </form>
+    </aside>
+  </main>
+
+  <script>
+    // Lightweight client-side behavior: file preview, drag-n-drop, validation
+    (function(){
+      const resumeInput = document.getElementById('resumeInput');
+      const fileNameEl = document.getElementById('fileName');
+      const fileDrop = document.getElementById('fileDrop');
+      const applyForm = document.getElementById('applyForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const saveDraftBtn = document.getElementById('saveDraft');
+
+      function setFileDisplay(file){
+        if(!file){ fileNameEl.textContent = 'No file chosen'; return; }
+        const sizeKB = Math.round(file.size/1024);
+        fileNameEl.textContent = file.name + ' • ' + sizeKB + ' KB';
+      }
+
+      resumeInput.addEventListener('change', e => {
+        setFileDisplay(e.target.files[0]);
+      });
+
+      // clicking fileDrop opens file dialog
+      fileDrop.addEventListener('click', ()=> resumeInput.click());
+
+      // keyboard accessible
+      fileDrop.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); resumeInput.click(); } });
+
+      // drag & drop
+      ['dragenter','dragover'].forEach(ev => fileDrop.addEventListener(ev, e => { e.preventDefault(); fileDrop.style.borderColor = 'rgba(96,165,250,0.6)'; }));
+      ['dragleave','drop'].forEach(ev => fileDrop.addEventListener(ev, e => { e.preventDefault(); fileDrop.style.borderColor = ''; }));
+      fileDrop.addEventListener('drop', e => {
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if(f){ resumeInput.files = e.dataTransfer.files; setFileDisplay(f); }
+      });
+
+      // simple client validation on submit
+      applyForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const name = applyForm.name.value.trim();
+        const email = applyForm.email.value.trim();
+        const resumeFiles = resumeInput.files;
+
+        if(!name){ alert('Please enter your full name'); return; }
+        if(!email || !/^\S+@\S+\.\S+$/.test(email)){ alert('Please enter a valid email'); return; }
+        if(!resumeFiles || resumeFiles.length === 0){ alert('Please attach your resume'); return; }
+
+        // disable submit to prevent duplicate submissions
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        // Prepare payload (FormData) to send to backend
+        const formData = new FormData(applyForm);
+        // attach the file explicitly (if needed)
+        if(resumeFiles[0]) formData.set('resume', resumeFiles[0]);
+
+        // submit via fetch (adjust URL to your backend)
+        fetch(applyForm.action, {
+          method: 'POST',
+          body: formData
+        })
+        .then(async res => {
+          if(!res.ok) throw new Error('Network response was not ok');
+          // expecting JSON {success:true,message:"..."}
+          const data = await res.json().catch(()=>({success:true}));
+          if(data && data.success !== false){
+            alert('Application submitted. Check your email for confirmation.');
+            applyForm.reset();
+            setFileDisplay(null);
+          } else {
+            throw new Error(data.message || 'Submission failed');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Submission failed. Please try again later.');
+        })
+        .finally(()=>{ submitBtn.disabled = false; submitBtn.textContent = 'Submit application'; });
+      });
+
+      // Save draft locally (client-side) — useful before sign-in
+      saveDraftBtn.addEventListener('click', ()=>{
+        const draft = {
+          name: applyForm.name.value,
+          email: applyForm.email.value,
+          phone: applyForm.phone.value,
+          position: applyForm.position.value,
+          skills: applyForm.skills.value,
+          cover: applyForm.cover.value,
+          jobId: applyForm.jobId.value,
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('jobApplicationDraft_' + draft.jobId, JSON.stringify(draft));
+        alert('Draft saved locally in browser');
+      });
+
+      // Load draft if present
+      (function loadDraft(){
+        const key = 'jobApplicationDraft_job_ABC123';
+        const raw = localStorage.getItem(key);
+        if(!raw) return;
+        try{
+          const d = JSON.parse(raw);
+          if(d.name) applyForm.name.value = d.name;
+          if(d.email) applyForm.email.value = d.email;
+          if(d.phone) applyForm.phone.value = d.phone;
+          if(d.position) applyForm.position.value = d.position;
+          if(d.skills) applyForm.skills.value = d.skills;
+          if(d.cover) applyForm.cover.value = d.cover;
+        }catch(e){ console.warn('failed to parse draft',e); }
+      })();
+    })();
+  </script>
+</body>
+</html>
