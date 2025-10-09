@@ -293,7 +293,7 @@ exports.getDashboard = (req, res, next) => {
               );
 
               try {
-                res.render('dashboard', {
+                res.render('Dashboard', {
                   user: matchedAccount,
                   PostedJob: postedJobs,
                   hiredWorkers: hiredWorkers
@@ -635,3 +635,4 @@ exports.postSendMsg =(req,res,next)=>{
   
 
 }
+
