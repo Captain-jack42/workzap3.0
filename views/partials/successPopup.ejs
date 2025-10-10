@@ -1,0 +1,46 @@
+<div id="successModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+    <div class="icon">&#10004;</div>
+    <h2>Application Submitted!</h2>
+    <p>We’ve received your application. A confirmation email is on its way.</p>
+  </div>
+</div>
+
+<script>
+  function showSuccessPopup() {
+    const modal = document.getElementById('successModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('hidden'), 3000);
+    document.querySelector('.close-btn').onclick = () => modal.classList.add('hidden');
+  }
+</script>
+<style>
+  .modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.icon {
+  font-size: 3rem;
+  color: green;
+  margin-bottom: 1rem;
+}
+.hidden { display: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+</style>
