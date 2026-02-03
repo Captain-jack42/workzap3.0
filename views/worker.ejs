@@ -1,39 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Available Workers</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="/worker.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#f8fafc;           /* light page background */
+      --panel:#ffffff;        /* card / panel background */
+      --muted:#6b7280;
+      --accent:#2563eb;       /* blue accent */
+      --accent-2:#06b6d4;     /* teal accent */
+      --glass: rgba(37,99,235,0.04);
+      --radius:12px;
+      --shadow: 0 8px 28px rgba(15,23,42,0.06);
+    }
+
+    *{box-sizing:border-box;font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#7b9bc6 0%, var(--bg) 100%);
+      color:#0b1220;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      /* padding:26px 18px; */
+    }
+
+    .container{ max-width:1200px; margin:0 auto; }
+
+    /* preserve original header partial */
+    .site-header{ margin-bottom:14px; }
+
+    h1.page-title{ margin:6px 0 12px 0; font-size:28px; font-weight:700; color:#0b1220; }
+
+    /* single-line search panel */
+    .search-panel{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:var(--panel);
+      padding:12px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .search-panel::-webkit-scrollbar{ height:8px; }
+    .search-panel::-webkit-scrollbar-thumb{ background: rgba(11,18,36,0.05); border-radius:8px; }
+
+    .search-field{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius:10px;
+      background:linear-gradient(180deg, rgba(37,99,235,0.03), rgba(6,182,212,0.02));
+      min-width:220px;
+      color:var(--muted);
+      flex: 0 0 auto;
+      border:1px solid rgba(11,18,36,0.03);
+    }
+    .search-field input, .search-field select {
+      background:transparent; border:0; outline:none; color:#0b1220; font-size:14px;
+      width:170px;
+    }
+    .search-field i{ color:var(--accent); font-size:14px; }
+
+    .range { display:flex; gap:8px; align-items:center; }
+    .range input{ width:84px; padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(11,18,36,0.04); color:#0b1220; }
+
+    .actions { display:flex; gap:10px; align-items:center; flex: 0 0 auto; }
+    .btn {
+      border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700;
+      color:#fff; background:linear-gradient(90deg,var(--accent), #3b82f6);
+      box-shadow: 0 8px 20px rgba(59,130,246,0.12);
+    }
+    .btn.ghost {
+      background:#fff; color:var(--accent); border:1px solid rgba(37,99,235,0.12);
+      box-shadow:none; font-weight:600;
+    }
+
+    /* grid */
+    .worker-grid{
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:18px;
+    }
+    @media (max-width:1050px){ .worker-grid{ grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:700px){ .worker-grid{ grid-template-columns: 1fr; } .search-field input{ width:120px; } }
+
+    .worker-card{
+      padding:16px;
+      border-radius:12px;
+      background:var(--panel);
+      box-shadow:var(--shadow);
+      display:flex;flex-direction:column;gap:10px; min-height:150px;
+      border:1px solid rgba(11,18,36,0.03);
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .worker-card:hover{ transform:translateY(-6px); box-shadow: 0 20px 40px rgba(11,18,36,0.08); }
+
+    .id-row{ display:flex; gap:10px; align-items:center; color:var(--muted); font-size:13px; }
+    .id-bubble{ padding:6px 10px; border-radius:999px; color:var(--accent); background:linear-gradient(90deg, rgba(37,99,235,0.06), rgba(6,182,212,0.03)); font-weight:700; }
+
+    .worker-name{ font-size:18px; font-weight:700; color:#07103a; margin:0; display:flex; gap:8px; align-items:center; }
+    .meta{ color:var(--muted); font-size:13px; display:flex; gap:8px; flex-wrap:wrap; }
+    .chip{ background:#f1f5f9; padding:6px 10px; border-radius:999px; color:#0b1220; font-weight:600; font-size:13px; border:1px solid rgba(11,18,36,0.02); }
+
+    .skills{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .skills-tag{ background:#eef2ff; color:#0b1220; padding:6px 8px; border-radius:999px; font-size:13px; border:1px solid rgba(37,99,235,0.06); }
+
+    .card-footer{ margin-top:auto; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .hire-btn{ background:linear-gradient(90deg,#06b6d4,#06b6d4); color:#fff; border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; gap:8px; align-items:center; box-shadow: 0 8px 18px rgba(6,182,212,0.12); }
+    .profile-link{ color:var(--muted); font-size:13px; }
+
+    .no-results{ grid-column:1/-1; text-align:center; color:var(--muted); padding:36px 20px; }
+
+    @media (max-width:520px){
+      .search-field{ min-width:140px; }
+      .search-field input{ width:110px; }
+      .range input{ width:64px; }
+      .actions .btn{ padding:8px 10px; font-size:13px; }
+    }
+  </style>
 </head>
 <body>
-    <%- include('partials/header') %>
-  <h1 class="page-title">Available Workers</h1>
-  <div class="worker-grid">
-    <% registeredAc.forEach(Id => { %>
-      <div class="worker-card">
-        <h4 class="worker-id"><i class="fas fa-id-badge"></i> ID: <span><%= Id._id %></span></h4>
-        <h4><i class="fas fa-user"></i>Name: <span><%= Id.fullName %></span></h4>
-        <h4><i class="fas fa-venus-mars"></i>Gender: <span><%= Id.gender %></span></h4>
-        <h4><i class="fas fa-briefcase"></i>Profession: <span><%= Id.profession %></span></h4>
-        <h4><i class="fas fa-clock"></i>Experience: <span><%= Id.experience %></span></h4>
-        <h4><i class="fas fa-tools"></i>Skills:</h4>
-        <div>
-          <% Id.skills.split(',').forEach(skill => { %>
-            <span class="skills-tag"><%= skill.trim() %></span>
-          <% }) %>
-        </div>
-        <form action="/hiring" method="post">
-          <button type="submit" class="hire-btn">
-          <i class="fas fa-handshake"></i>
-          Hire Now
-        </button>
-        <input type="hidden" name="id"  value="<%= Id._id %>"/>
-      </form>
+  <%- include('partials/header') %>
+  <div class="container">
+    
+
+    <h1 class="page-title">Available Workers</h1>
+
+    <!-- single-line search panel: all options stay on one line; horizontal scroll on small screens -->
+    <div class="search-panel" role="region" aria-label="search-panel">
+      <div class="search-field" title="Search name, skill or profession">
+        <i class="fa fa-search"></i>
+        <input id="q" type="search" placeholder="Search name, skill or profession" aria-label="Search">
       </div>
-    <% }) %>
+
+      <div class="search-field" title="Skill keyword">
+        <i class="fa fa-tools"></i>
+        <input id="skillFilter" type="search" placeholder="Skill (e.g., plumbing)" aria-label="Skill">
+      </div>
+
+      <div class="search-field" title="Profession">
+        <i class="fa fa-briefcase"></i>
+        <input id="professionFilter" type="search" placeholder="Profession (e.g., engineer)" aria-label="Profession">
+      </div>
+
+      <div class="search-field range" title="Experience range">
+        <i class="fa fa-clock"></i>
+        <input id="minExp" type="number" min="0" placeholder="Min yrs" aria-label="Min experience">
+        <span style="color:var(--muted);font-weight:700">—</span>
+        <input id="maxExp" type="number" min="0" placeholder="Max yrs" aria-label="Max experience">
+      </div>
+
+      <div class="actions">
+        <button id="clearBtn" class="btn ghost">Clear</button>
+        <button id="applyBtn" class="btn">Apply</button>
+      </div>
+    </div>
+
+    <div id="grid" class="worker-grid" style="margin-top:14px;">
+      <% registeredAc.forEach(Id => { %>
+        <div class="worker-card"
+             data-name="<%= (Id.fullName || '').toString().toLowerCase() %>"
+             data-experience="<%= (Id.experience || 0) %>"
+             data-skills="<%= (Id.skills || '').toString().toLowerCase() %>"
+             data-profession="<%= (Id.profession || '').toString().toLowerCase() %>">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="id-bubble"><i class="fa fa-id-badge" style="margin-right:6px;color:var(--accent)"></i><%= Id._id %></div>
+            <div style="color:var(--muted);font-size:13px;"><%= Id.gender %></div>
+          </div>
+
+          <h3 class="worker-name"><i class="fa fa-user" style="color:var(--accent-2)"></i> <span><%= Id.fullName %></span></h3>
+
+          <p class="meta">
+            <span class="chip"><i class="fa fa-briefcase" style="margin-right:6px"></i><%= Id.profession %></span>
+            <span class="chip"><i class="fa fa-clock" style="margin-right:6px"></i><%= Id.experience %> yrs</span>
+          </p>
+
+          <div class="skills">
+            <% (Id.skills || '').split(',').forEach(skill => { %>
+              <span class="skills-tag"><%= skill.trim() %></span>
+            <% }) %>
+          </div>
+
+          <div class="card-footer">
+            <form action="/hiring" method="post" style="margin:0;display:flex;gap:8px;align-items:center;">
+              <input type="hidden" name="id" value="<%= Id._id %>" />
+              <button type="submit" class="hire-btn">
+                <i class="fa fa-handshake"></i> Hire
+              </button>
+            </form>
+            <div class="profile-link">Profile</div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <div id="noResults" class="no-results" style="display:none;">No workers match your filters.</div>
   </div>
+
+  <script>
+    // keep JS logic unchanged (client-side filtering)
+    (function(){
+      const q = document.getElementById('q');
+      const minExp = document.getElementById('minExp');
+      const maxExp = document.getElementById('maxExp');
+      const skillFilter = document.getElementById('skillFilter');
+      const professionFilter = document.getElementById('professionFilter');
+      const applyBtn = document.getElementById('applyBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const grid = document.getElementById('grid');
+      const cards = Array.from(grid.querySelectorAll('.worker-card'));
+      const noResults = document.getElementById('noResults');
+
+      function normalize(s){ return (s||'').toString().trim().toLowerCase(); }
+
+      function applyFilters(){
+        const qv = normalize(q.value);
+        const minV = minExp.value === '' ? null : Number(minExp.value);
+        const maxV = maxExp.value === '' ? null : Number(maxExp.value);
+        const skillV = normalize(skillFilter.value);
+        const profV = normalize(professionFilter.value);
+
+        let visible = 0;
+        cards.forEach(card => {
+          const name = card.dataset.name || '';
+          const skills = card.dataset.skills || '';
+          const exp = Number(card.dataset.experience || 0);
+          const prof = card.dataset.profession || '';
+
+          let ok = true;
+
+          if (qv){
+            ok = name.includes(qv) || skills.includes(qv) || prof.includes(qv);
+          }
+          if (ok && skillV){
+            ok = skills.includes(skillV);
+          }
+          if (ok && profV){
+            ok = prof.includes(profV);
+          }
+          if (ok && minV !== null){
+            ok = exp >= minV;
+          }
+          if (ok && maxV !== null){
+            ok = exp <= maxV;
+          }
+
+          if (ok){
+            card.style.display = '';
+            visible++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        noResults.style.display = visible === 0 ? '' : 'none';
+      }
+
+      applyBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        applyFilters();
+      });
+
+      clearBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        q.value = '';
+        skillFilter.value = '';
+        professionFilter.value = '';
+        minExp.value = '';
+        maxExp.value = '';
+        cards.forEach(c => c.style.display = '');
+        noResults.style.display = 'none';
+      });
+
+      [q, skillFilter, professionFilter, minExp, maxExp].forEach(el => {
+        el.addEventListener('input', () => applyFilters());
+      });
+    })();
+  </script>
 </body>
 </html>

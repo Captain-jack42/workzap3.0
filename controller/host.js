@@ -7,62 +7,84 @@ const Job = require("../models/PostJob");
 const User = require("../models/User");
 const Application = require("../models/Application");
 const bcrypt = require('bcryptjs');
-// const e = require("express");
 
-exports.getHostHome =(req,res,next)=>{
+exports.getHostHome = (req, res, next) => {
   res.render('host-home');
 };
 
 
 
-exports.getSignup = (req,res,next)=>{
+exports.getSignup = (req, res, next) => {
   res.render('signup');
 };
 
-exports.postForm=(req,res,next)=>{
-  const {fullName,gender,profession,experience,skills} = req.body;
-  const home = new Worker(fullName,gender,profession,experience,skills);
-  home.save().then(()=>{
+exports.postForm = (req, res, next) => {
+  // console.log(req.session.user.id);
+  console.log(req.body);
+  const { fullName, gender, profession, experience, skills, email } = req.body;
+  const home = new Worker(fullName, gender, profession, experience, skills, email);
+  home.save().then(() => {
     console.log("form saved successfully");
   });
 
   res.render('home', { showPopup: false });
 };
 
-exports.postHiring=(req,res,next)=>{
-  const {id} = req.body;
-    console.log(id); // Debugging line
-    const user = req.session.user;
-    User.fetchAll().then(accounts =>{
-      const matchedAccount = accounts.find(account => account.email === user.email);  
-      if(!matchedAccount){
-        return res.render('Login', { error: 'User not found' });
-      }else{
-        if(!matchedAccount.hiredWorkers.includes(id)){
-          matchedAccount.hiredWorkers.push(id); // Add jobId to jobsApplied array
-        }
-        const updateUser = new User(
-          matchedAccount.fullname,        
-          matchedAccount.email,
-          matchedAccount.phone,
-          matchedAccount.password,
-          matchedAccount.userType
-        );
-        updateUser.chattedAccount = matchedAccount.chattedAccount;
-        updateUser.conversations = matchedAccount.conversations;
-        updateUser.hiredWorkers = matchedAccount.hiredWorkers;  
-        updateUser._id = matchedAccount._id;
-        updateUser.updateHirerAccount().then(() => {
-          console.log("User account updated with hired worker."); 
-          res.redirect('/dashboard'); // Redirect or respond as needed
-        }).catch(err => {
-          console.error("Error updating user account:", err);
-          res.status(500).send("Internal Server Error");
-        });
+exports.postHiring = (req, res, next) => {
+  console.log(req.body);
+  const { id } = req.body;
+  console.log("Hiring worker ID:", id);
 
-      }
-    })
+  const user = req.session.user;
+
+  User.fetchAll().then(accounts => {
+    const matchedAccount = accounts.find(account => account.email === user.email);
+
+    if (!matchedAccount) {
+      return res.render('Login', { error: 'User not found' });
+    }
+
+    // Ensure hiredWorkers is an array
+    const hiredWorkers = Array.isArray(matchedAccount.hiredWorkers)
+      ? [...matchedAccount.hiredWorkers]
+      : [];
+
+    // Prevent duplicate entries
+    if (!hiredWorkers.includes(id)) {
+      hiredWorkers.push(id);
+    }
+
+    // Create updated user instance
+    const updateUser = new User(
+      matchedAccount.fullname,
+      matchedAccount.email,
+      matchedAccount.phone,
+      matchedAccount.password,
+      matchedAccount.userType
+    );
+
+    // Preserve all relevant fields
+    updateUser.chattedAccount = matchedAccount.chattedAccount || [];
+    updateUser.conversations = matchedAccount.conversations || [];
+    updateUser.hiredWorkers = hiredWorkers;
+    updateUser.postedJobs = matchedAccount.postedJobs || [];
+    updateUser._id = matchedAccount._id;
+
+    updateUser.updateHirerAccount()
+      .then(() => {
+        console.log("User account updated with hired worker.");
+        res.redirect('/dashboard');
+      })
+      .catch(err => {
+        console.error("Error updating user account:", err);
+        res.status(500).send("Internal Server Error");
+      });
+  }).catch(err => {
+    console.error("Error fetching accounts:", err);
+    res.status(500).send("Internal Server Error");
+  });
 };
+
 
 exports.postJob = (req, res, next) => {
   const { JobTitle, Company, Location, JobType, JobDescription, SalaryRange, DeadLine } = req.body;
@@ -129,36 +151,36 @@ exports.postJob = (req, res, next) => {
 
 
 exports.getHired = (req, res, next) => {
-    const user = req.session.user;
+  const user = req.session.user;
 
-      const hiredWorkers = user.hiredWorkers || [];
+  const hiredWorkers = user.hiredWorkers || [];
 
-      return Worker.fetchAll().then(registeredAc => {
-        const workerDetails = registeredAc.filter(worker =>
-          hiredWorkers.includes(worker._id.toString())
-        );
+  return Worker.fetchAll().then(registeredAc => {
+    const workerDetails = registeredAc.filter(worker =>
+      hiredWorkers.includes(worker._id.toString())
+    );
 
-        res.render('Hired', {
-          matchedAccounts: workerDetails // Use filtered details here
-        });
-      });
-   
+    res.render('Hired', {
+      matchedAccounts: workerDetails // Use filtered details here
+    });
+  });
+
 };
 
-exports.getWorker=(req,res,next)=>{
-  const registeredAc = Worker.fetchAll().then(registeredAc=>{
-    res.render('worker',{registeredAc:registeredAc});
+exports.getWorker = (req, res, next) => {
+  const registeredAc = Worker.fetchAll().then(registeredAc => {
+    res.render('worker', { registeredAc: registeredAc });
   });
 }
 
-exports.getPostedJob=(req,res,next)=>{
-  const PostedJob = Job.fetchAll().then(PostedJob=>{
-    res.render('joblisting',{PostedJob:PostedJob});
+exports.getPostedJob = (req, res, next) => {
+  const PostedJob = Job.fetchAll().then(PostedJob => {
+    res.render('joblisting', { PostedJob: PostedJob });
   });
 }
 
 exports.postSignup = (req, res, next) => {
-  const { fullname, email, phone, password , userType } = req.body;
+  const { fullname, email, phone, password, userType } = req.body;
   const existingUserPromise = User.fetchAll().then(accounts => {
     return accounts.find(account => account.email === email);
   });
@@ -166,38 +188,38 @@ exports.postSignup = (req, res, next) => {
   existingUserPromise.then(existingUser => {
     if (existingUser) {
       return res.render('signup', { error: 'Email already in use' });
-    }else{
-  if(userType === 'worker'){
-  bcrypt.hash(password, 12).then(hashedPassword => {
-    const acc = new User(fullname, email, phone, hashedPassword,userType);
-    acc.save()
-      .then(() => {
-        res.render('Login');
-      })
-      .catch(err => {
-        console.error("Error creating user during signup:", err);
-        res.status(500).send("Internal Server Error");
-      });
-  });
-}else{
-  bcrypt.hash(password, 12).then(hashedPassword => {
-    const acc = new User(fullname, email, phone, hashedPassword,userType);
-    acc.saveHirer()
-      .then(() => {
-        res.render('Login');
-      })
-      .catch(err => {
-        console.error("Error creating hirer during signup:", err);
-        res.status(500).send("Internal Server Error");
-      });
-  });
-}
+    } else {
+      if (userType === 'worker') {
+        bcrypt.hash(password, 12).then(hashedPassword => {
+          const acc = new User(fullname, email, phone, hashedPassword, userType);
+          acc.save()
+            .then(() => {
+              res.render('Login');
+            })
+            .catch(err => {
+              console.error("Error creating user during signup:", err);
+              res.status(500).send("Internal Server Error");
+            });
+        });
+      } else {
+        bcrypt.hash(password, 12).then(hashedPassword => {
+          const acc = new User(fullname, email, phone, hashedPassword, userType);
+          acc.saveHirer()
+            .then(() => {
+              res.render('Login');
+            })
+            .catch(err => {
+              console.error("Error creating hirer during signup:", err);
+              res.status(500).send("Internal Server Error");
+            });
+        });
+      }
     }
-  } 
+  }
   ).catch(err => {
     console.error("Error during signup:", err);
     res.status(500).send("Internal Server Error");
-  } 
+  }
   );
 };
 
@@ -211,26 +233,26 @@ exports.postLogin = (req, res, next) => {
     }
     bcrypt.compare(req.body.password, matchingAccount.password).then(doMatch => {
       if (doMatch) {
-        
+
         req.session.isLoggedIn = true;
         req.session.userType = matchingAccount.userType;
         req.session.username = matchingAccount.fullname;
         req.session.email = matchingAccount.email;
-        if(matchingAccount.userType === 'worker'){
-        req.session.user = {
-              id: matchingAccount._id.toString(),
-              name: matchingAccount.fullname,
-              email: matchingAccount.email,
-              userType: matchingAccount.userType
-        };
-      }else{
-        req.session.user = {
-          id: matchingAccount._id.toString(),
-          name: matchingAccount.fullname,
-          email: matchingAccount.email,
-          userType: matchingAccount.userType
-    };
-      }
+        if (matchingAccount.userType === 'worker') {
+          req.session.user = {
+            id: matchingAccount._id.toString(),
+            name: matchingAccount.fullname,
+            email: matchingAccount.email,
+            userType: matchingAccount.userType
+          };
+        } else {
+          req.session.user = {
+            id: matchingAccount._id.toString(),
+            name: matchingAccount.fullname,
+            email: matchingAccount.email,
+            userType: matchingAccount.userType
+          };
+        }
         // console.log("Session User:", req.session.user); // Debugging line
         return req.session.save(() => {
           res.redirect('/home');
@@ -242,13 +264,13 @@ exports.postLogin = (req, res, next) => {
   });
 };
 
-exports.getFeedbackForm = (req,res,next)=>{
+exports.getFeedbackForm = (req, res, next) => {
   res.render('Feedback');
 }
 
-exports.postFeedback = (req,res,next)=>{
-  const {name,email,feed} = req.body;
-  const feedback = new Feedback(name,email,feed);
+exports.postFeedback = (req, res, next) => {
+  const { name, email, feed } = req.body;
+  const feedback = new Feedback(name, email, feed);
   feedback.save();
 
   res.render('Feedback');
@@ -282,27 +304,24 @@ exports.getDashboard = (req, res, next) => {
             postedJobIds.includes(job._id?.toString())
           );
 
-          Worker.fetchAll()
-            .then(allWorkers => {
-              const hiredWorkerIds = Array.isArray(matchedAccount.hiredWorkers)
-                ? matchedAccount.hiredWorkers.map(id => id.toString())
-                : [];
+          Worker.fetchAll().then(allWorkers => {
+            const hiredWorkerIds = Array.isArray(matchedAccount.hiredWorkers) ? matchedAccount.hiredWorkers.map(id => id.toString()) : [];
 
-              const hiredWorkers = allWorkers.filter(worker =>
-                hiredWorkerIds.includes(worker._id?.toString())
-              );
+            const hiredWorkers = allWorkers.filter(worker =>
+              hiredWorkerIds.includes(worker._id?.toString())
+            );
 
-              try {
-                res.render('Dashboard', {
-                  user: matchedAccount,
-                  PostedJob: postedJobs,
-                  hiredWorkers: hiredWorkers
-                });
-              } catch (renderErr) {
-                console.error("Render error:", renderErr);
-                res.status(500).send("Failed to render dashboard");
-              }
-            })
+            try {
+              res.render('Dashboard', {
+                user: matchedAccount,
+                PostedJob: postedJobs,
+                hiredWorkers: hiredWorkers
+              });
+            } catch (renderErr) {
+              console.error("Render error:", renderErr);
+              res.status(500).send("Failed to render dashboard");
+            }
+          })
             .catch(err => {
               console.error("Error fetching workers:", err);
               res.status(500).send("Failed to load workers");
@@ -320,11 +339,11 @@ exports.getDashboard = (req, res, next) => {
 };
 
 
-exports.getPayroll =(req,res,next)=>{
+exports.getPayroll = (req, res, next) => {
   res.render('Payroll');
 }
 
-exports.getReport =(req,res,next)=>{
+exports.getReport = (req, res, next) => {
   res.render('Report');
 }
 
@@ -351,7 +370,7 @@ exports.getProfile = (req, res, next) => {
 exports.postApplyJob = (req, res, next) => {
   const { jobId } = req.body;
   // console.log("Job ID to apply:", jobId); // Debugging line
-  res.render('applying-form',{
+  res.render('applying-form', {
     jobId: jobId
   });
 };
@@ -364,32 +383,32 @@ exports.postSaveJob = (req, res, next) => {
     const matchingAccount = accounts.find(account => account.email === req.session.user.email);
     if (!matchingAccount) {
       return res.render('Login', { error: 'User not found' });
-    }else{
-    if(!matchingAccount.bookmarkedJobs.includes(jobId)){
-      matchingAccount.bookmarkedJobs.push(jobId); // Add jobId to bookmarkedJobs array
+    } else {
+      if (!matchingAccount.bookmarkedJobs.includes(jobId)) {
+        matchingAccount.bookmarkedJobs.push(jobId); // Add jobId to bookmarkedJobs array
 
-    }
-    // console.log("After Update - Bookmarked Jobs:", matchingAccount.bookmarkedJobs); // Debugging line
-    const updatedUser = new User(
-      matchingAccount.fullname,
-      matchingAccount.email,
-      matchingAccount.phone,
-      matchingAccount.password,
-      matchingAccount.userType
-    );
-    updatedUser.chattedAccount = matchingAccount.chattedAccount;
-    updatedUser.conversations = matchingAccount.conversations;
-    updatedUser.bookmarkedJobs = matchingAccount.bookmarkedJobs;  
-    updatedUser.jobsApplied = matchingAccount.jobsApplied;
-    updatedUser._id = matchingAccount._id; // Ensure _id is set for update operation
-    updatedUser.updateaccount().then(() => {
-      // console.log("User account updated with bookmarked job."); 
-      res.redirect('/joblisting'); // Redirect or respond as needed
-    }).catch(err => {
-      console.error("Error updating user account:", err);
-      res.status(500).send("Internal Server Error");
-    });
-  
+      }
+      // console.log("After Update - Bookmarked Jobs:", matchingAccount.bookmarkedJobs); // Debugging line
+      const updatedUser = new User(
+        matchingAccount.fullname,
+        matchingAccount.email,
+        matchingAccount.phone,
+        matchingAccount.password,
+        matchingAccount.userType
+      );
+      updatedUser.chattedAccount = matchingAccount.chattedAccount;
+      updatedUser.conversations = matchingAccount.conversations;
+      updatedUser.bookmarkedJobs = matchingAccount.bookmarkedJobs;
+      updatedUser.jobsApplied = matchingAccount.jobsApplied;
+      updatedUser._id = matchingAccount._id; // Ensure _id is set for update operation
+      updatedUser.updateaccount().then(() => {
+        // console.log("User account updated with bookmarked job."); 
+        res.redirect('/joblisting'); // Redirect or respond as needed
+      }).catch(err => {
+        console.error("Error updating user account:", err);
+        res.status(500).send("Internal Server Error");
+      });
+
     }
   })
 };
@@ -413,21 +432,37 @@ exports.postSubmitApplication = (req, res, next) => {
     updatedUser.jobsApplied = Array.isArray(matchedAccount.jobsApplied) ? matchedAccount.jobsApplied.slice() : [];
     updatedUser.bookmarkedJobs = Array.isArray(matchedAccount.bookmarkedJobs) ? matchedAccount.bookmarkedJobs.slice() : [];
     updatedUser._id = matchedAccount._id;
-    // push job id if not present
-    if (!updatedUser.jobsApplied.includes(req.body.JobId)) {
-      updatedUser.jobsApplied.push(req.body.JobId);
-    }
 
-    const updater = matchedAccount.userType === 'worker' ? updatedUser.updateaccount() : updatedUser.updateHirerAccount();
-    updater.then(() => {
-      const { JobId, name, phone, email, resume, cover } = req.body;
-      const application = new Application(JobId, name, phone, email, resume, cover);
-      return application.save();
-    }).then(() => {
-      res.render('home', { showPopup: true });
-    }).catch(err => {
-      console.error('Error submitting application:', err);
-      res.status(500).send('Internal Server Error');
+    const { JobId, name, phone, email, resume, cover } = req.body;
+
+    // Check if job already applied
+    Application.fetchAll().then(applications => {
+      const alreadyApplied = applications.some(app =>
+        app.email === req.session.user.email && app.JobId === JobId
+      );
+
+      if (alreadyApplied) {
+        return res.render('home', { showPopup: false, message: 'You have already applied for this job.' });
+      }
+
+      // Push job ID to user's applied list if not already present
+      if (JobId && !updatedUser.jobsApplied.includes(JobId)) {
+        updatedUser.jobsApplied.push(JobId);
+      }
+
+      const updater = matchedAccount.userType === 'worker'
+        ? updatedUser.updateaccount()
+        : updatedUser.updateHirerAccount();
+
+      return updater.then(() => {
+        const application = new Application(JobId, name, phone, email, resume, cover);
+        return application.save();
+      }).then(() => {
+        res.render('home', { showPopup: true });
+      }).catch(err => {
+        console.error('Error submitting application:', err);
+        res.status(500).send('Internal Server Error');
+      });
     });
   });
 };
@@ -440,64 +475,82 @@ exports.postApplicants = (req, res, next) => {
     res.render('Applicants', { applications: jobApplications });
   }).catch(err => {
     res.status(500).send("Internal Server Error");
-  }); 
+  });
 }
 
 exports.postHireApplicant = (req, res, next) => {
   const user = req.session.user;
-  const hiredWorkers = user.hiredWorkers || [];
-
   const { email } = req.body;
-  Worker.fetchAll().then(workers => {
-    const workerToHire = workers.find(worker => worker.email === email);  
-    if (workerToHire) {
-      if (!hiredWorkers.includes(workerToHire._id.toString())) {
-        hiredWorkers.push(workerToHire._id.toString()); // Add worker ID to hiredWorkers array
+
+  Worker.fetchAll()
+    .then(workers => {
+      const workerToHire = workers.find(worker => worker.email === email);
+      if (!workerToHire) {
+        return res.status(404).send("Worker not found");
       }
+
       User.fetchAll().then(accounts => {
         const matchedAccount = accounts.find(account => account.email === user.email);
-        if (matchedAccount) {
-          const updateUser = new User(
-            matchedAccount.fullname,
-            matchedAccount.email,
-            matchedAccount.phone,
-            matchedAccount.password,
-            matchedAccount.userType
-          );
-          updateUser.chattedAccount = matchedAccount.chattedAccount;
-          updateUser.conversations = matchedAccount.conversations;
-          updateUser.hiredWorkers = hiredWorkers;  
-          updateUser.postedJobs = matchedAccount.postedJobs;
-          updateUser._id = matchedAccount._id;
-          updateUser.updateHirerAccount().then(() => {
-            console.log("User account updated with hired worker."); 
-            res.redirect('/dashboard'); // Redirect or respond as needed
-          }).catch(err => {
+        if (!matchedAccount) {
+          return res.status(404).send("User not found");
+        }
+
+        // Ensure hiredWorkers is an array
+        const hiredWorkers = Array.isArray(matchedAccount.hiredWorkers)
+          ? [...matchedAccount.hiredWorkers]
+          : [];
+
+        // Prevent duplicate entries
+        const workerIdStr = workerToHire._id.toString();
+        if (!hiredWorkers.includes(workerIdStr)) {
+          hiredWorkers.push(workerIdStr);
+        }
+
+        // Create updated user instance
+        const updateUser = new User(
+          matchedAccount.fullname,
+          matchedAccount.email,
+          matchedAccount.phone,
+          matchedAccount.password,
+          matchedAccount.userType
+        );
+
+        // Preserve all relevant fields
+        updateUser.chattedAccount = matchedAccount.chattedAccount || [];
+        updateUser.conversations = matchedAccount.conversations || [];
+        updateUser.hiredWorkers = hiredWorkers;
+        updateUser.postedJobs = matchedAccount.postedJobs || [];
+        updateUser._id = matchedAccount._id;
+
+        // Perform update
+        updateUser.updateHirerAccount()
+          .then(() => {
+            console.log("User account updated with hired worker.");
+            res.redirect('/dashboard');
+          })
+          .catch(err => {
             console.error("Error updating user account:", err);
             res.status(500).send("Internal Server Error");
-          }
-          );
-        }
+          });
       });
-    } else {
-      res.status(404).send("Worker not found");
-    }
-  }).catch(err => {
-    console.error("Error fetching workers:", err);
-    res.status(500).send("Internal Server Error");
-  });
-}
+    })
+    .catch(err => {
+      console.error("Error fetching workers:", err);
+      res.status(500).send("Internal Server Error");
+    });
+};
+
 
 exports.postStartChat = (req, res, next) => {
   const { email } = req.body;
   const userEmail = req.session.email;
-  
-  User.fetchAll().then(accounts=>{
+
+  User.fetchAll().then(accounts => {
     const matchedAccount = accounts.find(account => account.email === email);
     const updateChattedAccount = matchedAccount.chattedAccount;
-    if(!updateChattedAccount.includes(userEmail)){
-    updateChattedAccount.push(userEmail);
-    matchedAccount.conversations.push([]);
+    if (!updateChattedAccount.includes(userEmail)) {
+      updateChattedAccount.push(userEmail);
+      matchedAccount.conversations.push([]);
     }
     const updatedUser = new User(
       matchedAccount.fullname,
@@ -505,7 +558,7 @@ exports.postStartChat = (req, res, next) => {
       matchedAccount.phone,
       matchedAccount.password,
       matchedAccount.userType
-        );
+    );
     updatedUser.chattedAccount = updateChattedAccount;
     updatedUser.conversations = matchedAccount.conversations;
     updatedUser._id = matchedAccount._id;
@@ -514,98 +567,104 @@ exports.postStartChat = (req, res, next) => {
     });
   })
 
-  User.fetchAll().then(accounts=>{
+  User.fetchAll().then(accounts => {
     const matchedAccount = accounts.find(account => account.email === userEmail);
     const updateChattedAccount = matchedAccount.chattedAccount;
     // const size = 0;
-    if(!updateChattedAccount.includes(email)){
-    updateChattedAccount.push(email);
-    matchedAccount.conversations.push([]);
+    if (!updateChattedAccount.includes(email)) {
+      updateChattedAccount.push(email);
+      matchedAccount.conversations.push([]);
 
     }
-    const size = matchedAccount.conversations.length-1;
+    const size = matchedAccount.conversations.length - 1;
     const updatedUser = new User(
       matchedAccount.fullname,
       matchedAccount.email,
       matchedAccount.phone,
       matchedAccount.password,
       matchedAccount.userType
-        );
+    );
     updatedUser.chattedAccount = updateChattedAccount;
     updatedUser.conversations = matchedAccount.conversations;
     updatedUser._id = matchedAccount._id;
     updatedUser.updateaccount().then(() => {
       console.log("User account updated with sent message.");
-      
-      res.render('Chat' , {
-        chattedAccount : updateChattedAccount , 
-        chatObject : matchedAccount.conversations[size],
-        selectedAccount : email
+
+      res.render('Chat', {
+        chattedAccount: updateChattedAccount,
+        chatObject: matchedAccount.conversations[size],
+        selectedAccount: email
       });
     });
   })
 
 }
 
-exports.postSendMsg =(req,res,next)=>{
+exports.postSendMsg = (req, res, next) => {
   console.log(req.body);
-  const {recipientEmail , message} = req.body;
+  const { recipientEmail, message } = req.body;
   const userEmail = req.session.email;
-  User.fetchAll().then(accounts => {
+
+  if (!message || message.trim() === '') {
+    return res.status(400).json({ success: false, error: 'Message cannot be empty' });
+  }
+
+  // Helper promise to update recipient
+  const updateRecipient = User.fetchAll().then(accounts => {
     const matchedAccount = accounts.find(account => account.email === recipientEmail);
-    
+    if (!matchedAccount) throw new Error('Recipient not found');
+
     const index = matchedAccount.chattedAccount.indexOf(userEmail);
-    console.log(index);
-
-    const messageObj = {
-      email : userEmail,
-      message : message
-    }
-    
-    if (!matchedAccount) {
-      return res.status(404).send('User not found');
-    }
+    const messageObj = { email: userEmail, message: message, timestamp: new Date() };
     const reciverConversations = matchedAccount.conversations || [];
-    // reciverConversations.push(messageObj);
-    
-    reciverConversations[index].push(messageObj);
 
+    if (index === -1) {
+      // If clean state where they haven't chatted, we might need more logic here 
+      // but assuming startChat was called, this should exist.
+      // For robustness, could push if check fails, but stick to existing logic for now.
+      // Fallback logic to be safe:
+      matchedAccount.chattedAccount.push(userEmail);
+      reciverConversations.push([messageObj]);
+    } else {
+      reciverConversations[index].push(messageObj);
+    }
+
+    // Re-construct User to save
     const updatedUser = new User(
       matchedAccount.fullname,
       matchedAccount.email,
       matchedAccount.phone,
       matchedAccount.password,
       matchedAccount.userType
-        );
+    );
     updatedUser.chattedAccount = matchedAccount.chattedAccount;
     updatedUser.conversations = reciverConversations;
-    updatedUser._id = matchedAccount._id;
-    updatedUser.updateaccount().then(() => {
-      console.log("User account updated with sent message.");
+    updatedUser.postedJobs = matchedAccount.postedJobs;
+    updatedUser.hiredWorkers = matchedAccount.hiredWorkers;
+    updatedUser.bookmarkedJobs = matchedAccount.bookmarkedJobs;
+    updatedUser.jobsApplied = matchedAccount.jobsApplied;
 
-    }).catch(err => {
-      console.error("Error updating user account:", err);
-      res.status(500).send("Internal Server Error");
-    });
+    updatedUser._id = matchedAccount._id;
+    return updatedUser.updateaccount(); // Using generic updateaccount assumes it handles both types? careful. 
+    // Host.js usually implies Hirer? But userType checks are safer. 
+    // The original code used updateaccount(), so we stick to it.
   });
 
-  User.fetchAll().then(accounts => {
+  // Helper promise to update sender
+  const updateSender = User.fetchAll().then(accounts => {
     const matchedAccount = accounts.find(account => account.email === userEmail);
+    if (!matchedAccount) throw new Error('Sender not found');
 
-    const index2 = matchedAccount.chattedAccount.indexOf(recipientEmail);
-    console.log(index2);
+    const index = matchedAccount.chattedAccount.indexOf(recipientEmail);
+    const messageObj = { email: userEmail, message: message, timestamp: new Date() };
+    const conversations = matchedAccount.conversations || [];
 
-    const messageObj = {
-      email : userEmail,
-      message : message
+    if (index === -1) {
+      matchedAccount.chattedAccount.push(recipientEmail);
+      conversations.push([messageObj]);
+    } else {
+      conversations[index].push(messageObj);
     }
-    
-    if (!matchedAccount) {
-      return res.status(404).send('User not found');
-    }
-    const reciverConversations = matchedAccount.conversations || [];
-    // reciverConversations.push(messageObj);
-    reciverConversations[index2].push(messageObj);
 
     const updatedUser = new User(
       matchedAccount.fullname,
@@ -613,24 +672,25 @@ exports.postSendMsg =(req,res,next)=>{
       matchedAccount.phone,
       matchedAccount.password,
       matchedAccount.userType
-        );
+    );
     updatedUser.chattedAccount = matchedAccount.chattedAccount;
-    updatedUser.conversations = reciverConversations;
+    updatedUser.conversations = conversations;
+    updatedUser.postedJobs = matchedAccount.postedJobs;
+    updatedUser.hiredWorkers = matchedAccount.hiredWorkers;
+    updatedUser.bookmarkedJobs = matchedAccount.bookmarkedJobs;
+    updatedUser.jobsApplied = matchedAccount.jobsApplied;
     updatedUser._id = matchedAccount._id;
-    updatedUser.updateaccount().then(() => {
-      console.log("User account updated with sent message.");
-      // res.render('Chat', {chattedAccount : chattedAccount});/
-      res.render('Chat' , {
-        chattedAccount : matchedAccount.chattedAccount , 
-        chatObject : matchedAccount.conversations[index2],
-        selectedAccount : recipientEmail
-      });
 
-    }).catch(err => {
-      console.error("Error updating user account:", err);
-      res.status(500).send("Internal Server Error");
-    });
+    return updatedUser.updateaccount();
   });
 
-  
+  Promise.all([updateRecipient, updateSender])
+    .then(() => {
+      console.log("Message saved to DB for both users.");
+      res.status(200).json({ success: true });
+    })
+    .catch(err => {
+      console.error("Error saving message:", err);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    });
 }

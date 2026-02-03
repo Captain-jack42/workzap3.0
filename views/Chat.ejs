@@ -1,371 +1,1028 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WorkZap — Chat (Hirer ↔ Applicant)</title>
-  
-<style>
-  :root{
-    --bg:#f4f8ff;
-    --card:#ffffff;
-    --muted:#000000;
-    --hirer:#403d98;
-    --applicant:#0ea5e9;
-    --incoming:#eef6ff;
-    --outgoing:#f4ecff;
-    --glass: rgba(255,255,255,0.6);
-    --radius:12px;
-    --shadow: 0 6px 20px rgba(22, 28, 49, 0.08);
-    --max-width:980px;
-    --gap:14px;
-    --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
 
-  html,body{height:100%;margin:0;font-family:var(--font);background:
-    radial-gradient(800px 300px at 10% 10%, rgba(14,165,233,0.06), transparent),
-    linear-gradient(180deg,var(--bg),#f8fbff);
-    color:#111827; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
+  <link rel="stylesheet" href="/joblisting.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script> <!-- WebRTC Library -->
 
-  .chat-shell{
-    max-width:var(--max-width);
-    margin:36px auto;
-    display:grid;
-    grid-template-columns: 320px 1fr;
-    gap:24px;
-    padding:20px;
-  }
+  <style>
+    /* Video Call UI Overlay */
+    #video-call-modal {
+      display: none;
+      /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-  /* Sidebar (conversations) */
-  .sidebar{
-    background:linear-gradient(180deg,var(--card),var(--glass));
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    min-height:560px;
-  }
-  .brand{
-    display:flex;align-items:center;gap:10px;
-  }
-  .logo{
-    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--hirer),var(--applicant));
-    display:grid;place-items:center;color:white;font-weight:700;font-size:18px;
-    box-shadow:0 6px 16px rgba(64,61,152,0.12);
-  }
-  .sb-search{
-    display:flex;align-items:center;gap:8px;margin-top:8px;
-    background:#f7f9ff;padding:8px;border-radius:10px;
-  }
-  .sb-search input{flex:1;border:none;background:transparent;outline:none;color:#0f1724;font-size:14px;}
-  .convo-list{overflow:auto;padding-right:6px;}
-  .convo{
-    display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;cursor:pointer;
-  }
-  .convo:hover{background:#f1f6ff;}
-  .convo .av{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;color:white;font-weight:700;}
-  .convo .meta{flex:1}
-  .convo .meta .title{font-weight:600}
-  .convo .meta .sub{color:var(--muted);font-size:13px;margin-top:4px}
-  .convo .badge{background:#fde68a;color:#92400e;padding:6px 8px;border-radius:999px;font-weight:600;font-size:12px}
+    .video-grid {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+      flex-wrap: wrap;
+    }
 
-  /* Main chat card */
-  .chat-card{
-    background:linear-gradient(180deg,var(--card),#ffffff);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    display:flex;
-    flex-direction:column;
-    min-height:560px;
-    overflow:hidden;
-  }
+    .video-card {
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
 
-  .chat-header{
-    padding:18px 20px;border-bottom:1px solid #f0f3ff;display:flex;align-items:center;gap:12px;
-  }
-  .chat-header .title{font-weight:700;font-size:16px}
-  .chat-header .role{color:var(--muted);font-size:13px}
-  .chat-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-  .icon-btn{background:none;border:none;padding:8px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:16px}
-  .icon-btn:hover{background:#fbfbff;color:var(--hirer)}
+    .video-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  .messages{
-    padding:20px;flex:1;display:flex;flex-direction:column;gap:12px;overflow:auto;background:
-    linear-gradient(180deg, rgba(14,165,233,0.02), transparent 40%);
-  }
+    #local-video-card {
+      width: 300px;
+      height: 225px;
+      border: 2px solid #2563eb;
+    }
 
-  /* message bubbles */
-  .msg-row{display:flex;gap:12px;align-items:flex-end}
-  .msg-row.incoming{justify-content:flex-start}
-  .msg-row.outgoing{justify-content:flex-end}
-  .bubble{
-    max-width:66%;
-    padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.35;
-    box-shadow:0 4px 10px rgba(21,24,54,0.04);
-  }
-  .bubble .meta{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--muted)}
-  .bubble.incoming{background:var(--incoming);border-top-left-radius:6px}
-  .bubble.outgoing{background:var(--outgoing);border-top-right-radius:6px;color:#24144d}
+    #remote-video-card {
+      width: 600px;
+      height: 450px;
+      border: 2px solid #fff;
+    }
 
-  .avatar-small{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:white;font-weight:700}
+    .call-controls {
+      margin-top: 30px;
+      display: flex;
+      gap: 20px;
+    }
 
-  /* typing indicator */
-  .typing{
-    display:flex;align-items:center;gap:10px;background:transparent;padding:6px 10px;border-radius:999px;color:var(--muted);
-  }
-  .dots{display:flex;gap:4px;align-items:flex-end}
-  .dot{width:7px;height:7px;border-radius:999px;background:#cbd5e1;animation:blink 1s infinite}
-  .dot:nth-child(2){animation-delay:0.12s}
-  .dot:nth-child(3){animation-delay:0.24s}
-  @keyframes blink{0%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-6px);opacity:1}100%{transform:translateY(0);opacity:0.4}}
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
 
-  /* composer */
-  .composer{padding:14px;border-top:1px solid #f0f3ff;display:flex;gap:10px;align-items:center}
-  .composer textarea{flex:1;resize:none;height:46px;padding:10px 12px;border-radius:10px;border:1px solid #eef3ff;background:white;outline:none;font-size:14px}
-  .composer .send-btn{background:linear-gradient(90deg,var(--hirer),var(--applicant));color:white;padding:10px 14px;border-radius:9px;border:none;cursor:pointer;font-weight:600}
-  .composer .tools{display:flex;gap:8px;align-items:center}
-  .small{font-size:13px;color:var(--muted)}
+    .btn-end {
+      background: #ef4444;
+      color: white;
+    }
 
-  /* responsive */
-  @media (max-width:900px){
-    .chat-shell{grid-template-columns:1fr; padding:12px}
-    .sidebar{order:2}
-    .chat-card{order:1}
-  }
-</style>
-<style>
-  .msg-row { display:flex; gap:8px; margin-bottom:10px; align-items:flex-end; }
-  .msg-row.incoming { justify-content:flex-start; }
-  .msg-row.outgoing { justify-content:flex-end; }
-  .bubble.incoming { background:#a2b1df; color:#000103; }
-  .bubble.outgoing { background:#da90c4; color:#f9f9f9; }
-</style>
+    .btn-mute {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .control-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Incoming Call Notification */
+    #incoming-call-alert {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      z-index: 10000;
+      border-left: 5px solid #2563eb;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
+    }
+  </style>
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --card: #ffffff;
+      --muted: #000000;
+      --hirer: #403d98;
+      --applicant: #0ea5e9;
+      --incoming: #eef6ff;
+      --outgoing: #f4ecff;
+      --glass: rgba(255, 255, 255, 0.6);
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(22, 28, 49, 0.08);
+      --max-width: 980px;
+      --gap: 14px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: var(--font);
+      background:
+        radial-gradient(800px 300px at 10% 10%, rgba(14, 165, 233, 0.06), transparent),
+        linear-gradient(180deg, var(--bg), #f8fbff);
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .chat-shell {
+      max-width: var(--max-width);
+      margin: 36px auto;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      padding: 20px;
+    }
+
+    /* Sidebar (conversations) */
+    .sidebar {
+      background: linear-gradient(180deg, var(--card), var(--glass));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 560px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--hirer), var(--applicant));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 6px 16px rgba(64, 61, 152, 0.12);
+    }
+
+    .sb-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      background: #f7f9ff;
+      padding: 8px;
+      border-radius: 10px;
+    }
+
+    .sb-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      color: #0f1724;
+      font-size: 14px;
+    }
+
+    .convo-list {
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .convo {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .convo:hover {
+      background: #f1f6ff;
+    }
+
+    .convo .av {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700;
+    }
+
+    .convo .meta {
+      flex: 1
+    }
+
+    .convo .meta .title {
+      font-weight: 600
+    }
+
+    .convo .meta .sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px
+    }
+
+    .convo .badge {
+      background: #fde68a;
+      color: #92400e;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 12px
+    }
+
+    /* Main chat card */
+    .chat-card {
+      background: linear-gradient(180deg, var(--card), #ffffff);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      min-height: 560px;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #f0f3ff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header .title {
+      font-weight: 700;
+      font-size: 16px
+    }
+
+    .chat-header .role {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .chat-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px
+    }
+
+    .icon-btn:hover {
+      background: #fbfbff;
+      color: var(--hirer)
+    }
+
+    .messages {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+      background:
+        linear-gradient(180deg, rgba(14, 165, 233, 0.02), transparent 40%);
+    }
+
+    /* message bubbles */
+    .msg-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end
+    }
+
+    .msg-row.incoming {
+      justify-content: flex-start
+    }
+
+    .msg-row.outgoing {
+      justify-content: flex-end
+    }
+
+    .bubble {
+      max-width: 66%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.35;
+      box-shadow: 0 4px 10px rgba(21, 24, 54, 0.04);
+    }
+
+    .bubble .meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .bubble.incoming {
+      background: var(--incoming);
+      border-top-left-radius: 6px
+    }
+
+    .bubble.outgoing {
+      background: var(--outgoing);
+      border-top-right-radius: 6px;
+      color: #24144d
+    }
+
+    .avatar-small {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 700
+    }
+
+    /* typing indicator */
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+    }
+
+    .dots {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      animation: blink 1s infinite
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.12s
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.24s
+    }
+
+    @keyframes blink {
+      0% {
+        transform: translateY(0);
+        opacity: 0.4
+      }
+
+      50% {
+        transform: translateY(-6px);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(0);
+        opacity: 0.4
+      }
+    }
+
+    /* composer */
+    .composer {
+      padding: 14px;
+      border-top: 1px solid #f0f3ff;
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .composer textarea {
+      flex: 1;
+      resize: none;
+      height: 46px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #eef3ff;
+      background: white;
+      outline: none;
+      font-size: 14px
+    }
+
+    .composer .send-btn {
+      background: linear-gradient(90deg, var(--hirer), var(--applicant));
+      color: white;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600
+    }
+
+    .composer .tools {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    /* responsive */
+    @media (max-width:900px) {
+      .chat-shell {
+        grid-template-columns: 1fr;
+        padding: 12px
+      }
+
+      .sidebar {
+        order: 2
+      }
+
+      .chat-card {
+        order: 1
+      }
+    }
+
+    .call-btn-pulse {
+      transition: all 0.3s ease;
+    }
+
+    .call-btn-pulse:hover {
+      background: #2563eb !important;
+      color: white !important;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+      transform: scale(1.05);
+    }
+  </style>
+  <style>
+    .msg-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: flex-end;
+    }
+
+    .msg-row.incoming {
+      justify-content: flex-start;
+    }
+
+    .msg-row.outgoing {
+      justify-content: flex-end;
+    }
+
+    .bubble.incoming {
+      background: #a2b1df;
+      color: #000103;
+    }
+
+    .bubble.outgoing {
+      background: #da90c4;
+      color: #f9f9f9;
+    }
+  </style>
 
 </head>
+
 <body>
- <%- include('partials/header') %>
-<div class="chat-shell" role="application" aria-label="Hirer applicant chat">
-  <aside class="sidebar" aria-label="Conversations">
-    <div class="brand">
-      <div class="logo">WZ</div>
-      <div>
-        <div style="font-weight:700">WorkZap</div>
-        <div style="font-size:13px;color:var(--muted)">Applicants — Conversations</div>
-      </div>
+  <%- include('partials/header') %>
+    <div class="chat-shell" role="application" aria-label="Hirer applicant chat">
+      <aside class="sidebar" aria-label="Conversations">
+        <div class="brand">
+          <div class="logo">WZ</div>
+          <div>
+            <div style="font-weight:700">WorkZap</div>
+            <div style="font-size:13px;color:var(--muted)">Applicants — Conversations</div>
+          </div>
+        </div>
+
+        <div class="sb-search" role="search" aria-label="Search conversations">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <path d="M21 21l-4.35-4.35" stroke="#94a3b8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <input placeholder="Search name or email" id="convSearch" />
+        </div>
+
+        <!--  -->
+        <form id="convoForm" method="post" action="/chat" style="display:none">
+          <input type="hidden" name="index" id="convoIndex">
+          <input type="hidden" name="email" id="convoEmail">
+        </form>
+
+        <header id="header" style="display:flex;gap:12px;align-items:center;padding:12px">
+          <div id="headerAvatar"
+            style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#3b82f6;color:#fff">
+            U</div>
+          <div>
+            <div id="headerTitle">Conversation</div>
+            <div id="headerSub" style="font-size:12px;color:#666">Select a conversation</div>
+          </div>
+        </header>
+
+        <div class="convo-list" id="convoList" aria-live="polite">
+          <% (chattedAccount || []).forEach(function(email, idx){ %>
+            <div class="convo" data-id="<%= idx %>" data-email="<%= email %>" onclick="selectConvo(this)"
+              style="display:flex;gap:12px;padding:8px;cursor:pointer;border-radius:6px;">
+              <div class="av"
+                style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,var(--applicant),#22c1c3)">
+                <%= (email && email[0] || 'U' ).toUpperCase() %>
+              </div>
+              <div class="meta">
+                <div class="title">
+                  <%= email %>
+                </div>
+                <div class="sub">Click to Refresh Chat</div>
+              </div>
+            </div>
+            <% }) %>
+        </div>
+
+
+      </aside>
+
+      <section class="chat-card" aria-label="Conversation panel">
+        <header class="chat-header">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="avatar-small" id="headerAvatar"
+              style="background:linear-gradient(135deg,var(--applicant),#22c1c3)">U</div>
+            <div>
+
+              <div class="title" id="headerTitle">Select a conversation :</div>
+
+              <div class="role" id="headerSub">&nbsp;</div>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="icon-btn call-btn-pulse" title="Start Video Call" type="button" onclick="startVideoCall()"
+              style="color: #2563eb; background: #eff6ff;">
+              <i class="fas fa-video"></i>
+            </button>
+            <button class="icon-btn" title="View profile" type="button">👤</button>
+            <button class="icon-btn" title="More" type="button">⋯</button>
+          </div>
+        </header>
+
+        <div id="messages">
+          <% const loggedEmail=(typeof email !=='undefined' ) ? email : (locals && locals.email ? locals.email : '' );
+            const msgs=Array.isArray(chatObject) ? chatObject : []; msgs.forEach(obj=> {
+            const isOutgoing = obj.email === loggedEmail;
+            %>
+            <div class="msg-row <%= isOutgoing ? 'outgoing' : 'incoming' %>">
+              <% if (!isOutgoing) { %>
+                <div class="avatar-small" style="background: linear-gradient(135deg,var(--applicant),#22c1c3);">
+                  <%= (obj.email && obj.email[0]) ? obj.email[0].toUpperCase() : 'U' %>
+                </div>
+                <% } %>
+
+                  <div class="bubble <%= isOutgoing ? 'outgoing' : 'incoming' %>">
+                    <%= obj.message %>
+                      <div class="meta"><span class="small">
+                          <%= obj.timestamp ? new Date(obj.timestamp).toLocaleTimeString() : 'Earlier' %>
+                        </span></div>
+                  </div>
+
+                  <% if (isOutgoing) { %>
+                    <div style="width:36px;flex:0 0 36px"></div>
+                    <% } %>
+            </div>
+            <% }) %>
+        </div>
+
+
+
+        <form class="composer" id="composer" onsubmit="return sendMessage()">
+          <div class="tools" aria-hidden>
+            <button type="button" class="icon-btn" title="Attach file" onclick="attachFile()">📎</button>
+            <button type="button" class="icon-btn" title="Emoji" onclick="insertEmoji()">😊</button>
+          </div>
+          <input type="hidden" name="recipientEmail" id="recipientEmailField" value="<%= selectedAccount || '' %>" />
+          <textarea id="msgInput" name="message" placeholder="Write a message..." aria-label="Message input"></textarea>
+          <button type="submit" class="send-btn" id="sendBtn">Send</button>
+        </form>
+      </section>
     </div>
 
-    <div class="sb-search" role="search" aria-label="Search conversations">
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden>
-        <path d="M21 21l-4.35-4.35" stroke="#94a3b8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <input placeholder="Search name or email" id="convSearch" />
-    </div>
+    <style>
+      @keyframes pulse-ring {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+        }
 
-    <!--  -->
-    <form id="convoForm" method="post" action="/chat" style="display:none">
-  <input type="hidden" name="index" id="convoIndex">
-  <input type="hidden" name="email" id="convoEmail">
-</form>
+        70% {
+          transform: scale(1);
+          box-shadow: 0 0 0 20px rgba(37, 99, 235, 0);
+        }
 
-<header id="header" style="display:flex;gap:12px;align-items:center;padding:12px">
-  <div id="headerAvatar" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#3b82f6;color:#fff">U</div>
-  <div>
-    <div id="headerTitle">Conversation</div>
-    <div id="headerSub" style="font-size:12px;color:#666">Select a conversation</div>
-  </div>
-</header>
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+        }
+      }
+    </style>
 
-<div class="convo-list" id="convoList" aria-live="polite">
-  <% (chattedAccount || []).forEach(function(email, idx){ %>
-    <div class="convo" data-id="<%= idx %>" data-email="<%= email %>" onclick="selectConvo(this)" style="display:flex;gap:12px;padding:8px;cursor:pointer;border-radius:6px;">
-      <div class="av" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,var(--applicant),#22c1c3)">
-        <%= (email && email[0] || 'U').toUpperCase() %>
+    <!-- Video Call Modal -->
+    <div id="video-call-modal">
+      <!-- Ringing UI (Visible when calling) -->
+      <div id="ringing-ui" style="display:none; flex-direction:column; align-items:center;">
+        <div
+          style="width:100px; height:100px; background:#2563eb; border-radius:50%; display:grid; place-items:center; color:white; font-size:40px; margin-bottom:20px; box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); animation: pulse-ring 2s infinite;">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2 style="color:white; margin-bottom:5px;">Calling...</h2>
+        <p id="ringing-name" style="color:rgba(255,255,255,0.7);">User</p>
+        <button onclick="endCall()"
+          style="margin-top:40px; width:60px; height:60px; border-radius:50%; background:#ef4444; border:none; color:white; font-size:24px; cursor:pointer;"><i
+            class="fas fa-phone-slash"></i></button>
       </div>
-      <div class="meta">
-        <div class="title"><%= email %></div>
-        <div class="sub">Click to Refresh Chat</div>
-      </div>
-    </div>
-  <% }) %>
-</div>
 
-
-  </aside>
-
-  <section class="chat-card" aria-label="Conversation panel">
-    <header class="chat-header">
-      <div style="display:flex;gap:12px;align-items:center">
-        <div class="avatar-small" id="headerAvatar" style="background:linear-gradient(135deg,var(--applicant),#22c1c3)">U</div>
-        <div>
-          
-            <div class="title" id="headerTitle">Select a conversation :</div>
-          
-          <div class="role" id="headerSub">&nbsp;</div>
+      <!-- Video Grid (Visible when connected) -->
+      <div class="video-grid" id="video-grid" style="display:none;">
+        <div class="video-card" id="remote-video-card">
+          <video id="remote-video" playsinline autoplay></video>
+          <div
+            style="position: absolute; bottom: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">
+            Remote User</div>
+        </div>
+        <div class="video-card" id="local-video-card">
+          <video id="local-video" playsinline autoplay muted></video>
+          <div
+            style="position: absolute; bottom: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">
+            You</div>
         </div>
       </div>
-      <div class="chat-actions">
-        <button class="icon-btn" title="Call" type="button">📞</button>
-        <button class="icon-btn" title="View profile" type="button">👤</button>
-        <button class="icon-btn" title="More" type="button">⋯</button>
+
+      <!-- Controls (Visible when connected) -->
+      <div class="call-controls" id="video-controls" style="display:none;">
+        <button class="control-btn btn-end" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
       </div>
-    </header>
-
-    <div id="messages">
-  <% 
-    const loggedEmail = (typeof email !== 'undefined') ? email : (locals && locals.email ? locals.email : '');
-    const msgs = Array.isArray(chatObject) ? chatObject : [];
-    msgs.forEach(obj => {
-      const isOutgoing = obj.email === loggedEmail;
-  %>
-    <div class="msg-row <%= isOutgoing ? 'outgoing' : 'incoming' %>">
-      <% if (!isOutgoing) { %>
-        <div class="avatar-small" style="background: linear-gradient(135deg,var(--applicant),#22c1c3);">
-          <%= (obj.email && obj.email[0]) ? obj.email[0].toUpperCase() : 'U' %>
-        </div>
-      <% } %>
-
-      <div class="bubble <%= isOutgoing ? 'outgoing' : 'incoming' %>">
-        <%= obj.message %>
-        <div class="meta"><span class="small"><%= obj.timestamp ? new Date(obj.timestamp).toLocaleTimeString() : 'Earlier' %></span></div>
-      </div>
-
-      <% if (isOutgoing) { %>
-        <div style="width:36px;flex:0 0 36px"></div>
-      <% } %>
+      <h3 id="call-status" style="color: white; margin-top: 20px; display:none;">Connecting...</h3>
     </div>
-  <% }) %>
-</div>
 
-
-
-    <form class="composer" id="composer" action="/sendMessage" method="POST" onsubmit="return sendMessage()">
-      <div class="tools" aria-hidden>
-        <button type="button" class="icon-btn" title="Attach file" onclick="attachFile()">📎</button>
-        <button type="button" class="icon-btn" title="Emoji" onclick="insertEmoji()">😊</button>
+    <!-- Incoming Call Alert -->
+    <div id="incoming-call-alert">
+      <h4 style="margin: 0 0 10px 0; font-size: 16px;">Incoming Call from <span id="caller-id"
+          style="color:#2563eb">User</span></h4>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="acceptCall()"
+          style="background: #22c55e; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Answer</button>
+        <button onclick="rejectCall()"
+          style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Decline</button>
       </div>
-      <input type="hidden" name="recipientEmail" id="recipientEmailField" value="<%= selectedAccount || '' %>" />
-      <textarea id="msgInput" name="message" placeholder="Write a message..." aria-label="Message input"></textarea>
-      <button type="submit" class="send-btn">Send</button>
-    </form>
-  </section>
-</div>
+    </div>
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const sendBtn = document.getElementById('sendBtn');
 
-<script>
-  const messagesEl = document.getElementById('messages');
-  const input = document.getElementById('msgInput');
-  const recipientEmailField = document.getElementById('recipientEmailField');
-  const selectedEmail2 = recipientEmailField?.value || '';
-  let selectedEmail = '';
+    </script>
+    <script>
+      const messagesEl = document.getElementById('messages');
+      const input = document.getElementById('msgInput');
+      const recipientEmailField = document.getElementById('recipientEmailField');
+      // Fix: Initialize selectedEmail from the hidden field (server-side value) so call works after reload
+      let selectedEmail = recipientEmailField ? recipientEmailField.value : '';
 
-  function scrollToBottom(){
-    if (!messagesEl) return;
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
+      // Get the logged-in user's email from the server-side template
+      const myEmail = "<%= (typeof email !== 'undefined') ? email : (locals && locals.email ? locals.email : '') %>";
 
-  function sendMessage(){
-    const text = input.value.trim();
-    // const emailToUse = selectedEmail2 || (recipientEmailField && recipientEmailField.value) || '';
-    if (!text || !selectedEmail2) return false;
+      function scrollToBottom() {
+        if (!messagesEl) return;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
 
-    if (recipientEmailField) recipientEmailField.value = selectedEmail2;
+      // Auto-highlight the active conversation on load
+      if (selectedEmail) {
+        const activeConvo = document.querySelector(`.convo[data-email="${selectedEmail}"]`);
+        if (activeConvo) {
+          activeConvo.style.background = '#eef6ff';
+          // Update header if needed (though server likely rendered it)
+          const name = activeConvo.querySelector('.title')?.textContent?.trim();
+          if (name) {
+            document.getElementById('headerTitle').textContent = name;
+            const av = document.getElementById('headerAvatar');
+            if (av) av.textContent = name[0].toUpperCase();
+          }
+        }
+      }
 
-    const row = document.createElement('div');
-    row.className = 'msg-row outgoing';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble outgoing';
-    bubble.setAttribute('role','article');
-    bubble.innerHTML = text + '<div class="meta"><span class="small">Now</span></div>';
-    row.appendChild(bubble);
-    if (messagesEl) messagesEl.appendChild(row);
+      // Socket.IO Listener
+      socket.on("message", (data) => {
+        // If the message is from me, I've already appended it (Optimistic UI)
+        if (data.email === myEmail) return;
 
-    input.value = text;
-    scrollToBottom();
-    simulateReply();
-    return true;
-  }
+        const senderEmail = data.email;
 
-  function simulateReply(){
-    const typingIndicator = document.getElementById('typingIndicator');
-    if (typingIndicator) typingIndicator.style.display = 'flex';
-    setTimeout(()=>{
-      if (typingIndicator) typingIndicator.style.display = 'none';
+        const row = document.createElement('div');
+        row.className = 'msg-row incoming'; // It's incoming because it's not me
 
-      const row = document.createElement('div');
-      row.className = 'msg-row incoming';
-      const av = document.createElement('div');
-      av.className = 'avatar-small';
-      av.style.background = 'linear-gradient(135deg,var(--applicant),#22c1c3)';
-      av.textContent = 'RS';
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble incoming';
-      bubble.innerHTML = 'Thanks — noted. I’ll join at 3 PM.' + '<div class="meta"><span class="small">Now</span></div>';
-      row.appendChild(av);
-      row.appendChild(bubble);
-      if (messagesEl) messagesEl.appendChild(row);
+        const av = document.createElement('div');
+        av.className = 'avatar-small';
+        av.style.background = 'linear-gradient(135deg,var(--applicant),#22c1c3)';
+        av.textContent = (senderEmail && senderEmail[0]) ? senderEmail[0].toUpperCase() : 'U';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble incoming';
+        bubble.innerHTML = data.message + '<div class="meta"><span class="small">' + new Date().toLocaleTimeString() + '</span></div>';
+
+        row.appendChild(av);
+        row.appendChild(bubble);
+
+        if (messagesEl) messagesEl.appendChild(row);
+        scrollToBottom();
+      });
+
+      async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return false;
+
+        const recipientEmail = recipientEmailField.value; // Get from hidden field
+        if (!recipientEmail) {
+          console.error("No recipient selected");
+          return false;
+        }
+
+        // Optimistic UI: Append my message immediately
+        const row = document.createElement('div');
+        row.className = 'msg-row outgoing';
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble outgoing';
+        bubble.setAttribute('role', 'article');
+        bubble.innerHTML = text + '<div class="meta"><span class="small">Now</span></div>';
+        row.appendChild(bubble);
+        if (messagesEl) messagesEl.appendChild(row);
+        scrollToBottom();
+
+        // Clear input immediately to prevent double sends, but store text for retry if needed
+        input.value = '';
+
+        // Emit to socket for real-time to OTHER user (if they are online)
+        socket.emit("user-message", { message: text, email: myEmail });
+
+        try {
+          const response = await fetch('/sendMessage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded', // Middleware expects this or json by default bodyParser setup? 
+              // app.js has app.use(express.urlencoded()); so x-www-form-urlencoded is safest without changing app.js
+            },
+            body: new URLSearchParams({
+              'recipientEmail': recipientEmail,
+              'message': text
+            })
+          });
+
+          const data = await response.json();
+          if (!data.success) {
+            console.error("Failed to save message:", data.error);
+            alert("Message failed to send to server."); // Simple fallback feedback
+          } else {
+            console.log("Message saved successfully");
+          }
+        } catch (err) {
+          console.error("Error sending message:", err);
+          alert("Network error. Message might not be saved.");
+        }
+
+        return false; // Prevent form submission
+      }
+
+      function selectConvo(el) {
+        if (!el) return;
+
+        document.querySelectorAll('.convo').forEach(c => c.style.background = '');
+        el.style.background = '#eef6ff';
+
+        const name = el.querySelector('.title')?.textContent || 'Conversation';
+        const sub = el.querySelector('.sub')?.textContent || '';
+        selectedEmail = el.getAttribute('data-email') || '';
+
+        const headerTitle = document.getElementById('headerTitle');
+        const headerSub = document.getElementById('headerSub');
+        if (headerTitle) headerTitle.textContent = name;
+        if (headerSub) headerSub.textContent = sub;
+
+        const av = document.getElementById('headerAvatar');
+        if (av) av.textContent = name[0]?.toUpperCase() || 'U';
+
+        // submit hidden form to /chat with index so page refreshes and server receives the index
+        const idx = el.getAttribute('data-id');
+        const convoForm = document.getElementById('convoForm');
+        const formIndex = document.getElementById('convoIndex');
+        const formEmail = document.getElementById('convoEmail');
+
+        if (convoForm && formIndex && formEmail) {
+          formIndex.value = idx;
+          formEmail.value = selectedEmail;
+          convoForm.submit();
+        } else {
+          // fallback: redirect with query params
+          location.href = `/chat?index=${encodeURIComponent(idx)}&email=${encodeURIComponent(selectedEmail)}`;
+        }
+      }
+
+      function attachFile() { alert('Attach file dialog (implement as needed)'); }
+      function insertEmoji() { input.value += ' 😊'; input.focus(); }
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          if (!e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        }
+      });
+
+      // initial scroll
       scrollToBottom();
-    }, 1200);
-  }
 
-  function selectConvo(el){
-    if (!el) return;
+      // expose for inline onclicks
+      window.selectConvo = selectConvo;
+      window.sendMessage = sendMessage;
 
-    document.querySelectorAll('.convo').forEach(c => c.style.background = '');
-    el.style.background = '#eef6ff';
+      // ================= VIDEO CALL LOGIC =================
 
-    const name = el.querySelector('.title')?.textContent || 'Conversation';
-    const sub = el.querySelector('.sub')?.textContent || '';
-    selectedEmail = el.getAttribute('data-email') || '';
+      let localStream;
+      let remoteStream;
+      let peer;
+      let incomingCallData = null;
 
-    const headerTitle = document.getElementById('headerTitle');
-    const headerSub = document.getElementById('headerSub');
-    if (headerTitle) headerTitle.textContent = name;
-    if (headerSub) headerSub.textContent = sub;
+      // 1. Register User on Socket Connect
+      socket.on("connect", () => {
+        console.log("Connected to socket");
+        socket.emit("register-user", myEmail);
+      });
 
-    const av = document.getElementById('headerAvatar');
-    if (av) av.textContent = name[0]?.toUpperCase() || 'U';
+      let callTimeout;
 
-    // submit hidden form to /chat with index so page refreshes and server receives the index
-    const idx = el.getAttribute('data-id');
-    const convoForm = document.getElementById('convoForm');
-    const formIndex = document.getElementById('convoIndex');
-    const formEmail = document.getElementById('convoEmail');
+      // 2. Start Call (Initiator)
+      async function startVideoCall() {
+        if (!selectedEmail) return alert("Please select a user to chat with first!");
 
-    if (convoForm && formIndex && formEmail) {
-      formIndex.value = idx;
-      formEmail.value = selectedEmail;
-      convoForm.submit();
-    } else {
-      // fallback: redirect with query params
-      location.href = `/chat?index=${encodeURIComponent(idx)}&email=${encodeURIComponent(selectedEmail)}`;
-    }
-  }
+        // Show Modal with Ringing UI
+        document.getElementById('video-call-modal').style.display = 'flex';
+        document.getElementById('ringing-ui').style.display = 'flex';
+        document.getElementById('ringing-name').innerText = selectedEmail;
 
-  function attachFile(){ alert('Attach file dialog (implement as needed)'); }
-  function insertEmoji(){ input.value += ' 😊'; input.focus(); }
+        document.getElementById('video-grid').style.display = 'none';
+        document.getElementById('video-controls').style.display = 'none';
+        document.getElementById('call-status').style.display = 'none';
 
-  input.addEventListener('keydown', e=>{
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
-      e.preventDefault();
-      const composer = document.getElementById('composer');
-      if (composer) composer.submit();
-    }
-  });
+        // Timeout if not answered in 30s
+        callTimeout = setTimeout(() => {
+          alert("No answer.");
+          endCall();
+        }, 30000);
 
-  // initial scroll
-  scrollToBottom();
+        try {
+          // Get User Media (Camera/Mic)
+          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          document.getElementById('local-video').srcObject = localStream;
 
-  // expose for inline onclicks
-  window.selectConvo = selectConvo;
-  window.sendMessage = sendMessage;
-</script>
+          // Create Peer for Initiator
+          peer = new SimplePeer({ initiator: true, trickle: false, stream: localStream });
+
+          peer.on('signal', (data) => {
+            socket.emit("call-user", {
+              userToCall: selectedEmail,
+              signalData: data,
+              from: myEmail
+            });
+          });
+
+          peer.on('stream', (stream) => {
+            document.getElementById('remote-video').srcObject = stream;
+            // Switch to Video View
+            document.getElementById('ringing-ui').style.display = 'none';
+            document.getElementById('video-grid').style.display = 'flex';
+            document.getElementById('video-controls').style.display = 'flex';
+          });
+
+          peer.on('error', err => console.error("Peer Error:", err));
+
+          // Handle Call Accepted
+          socket.on("call-accepted", (signal) => {
+            clearTimeout(callTimeout);
+            peer.signal(signal);
+            // Switch to Video View immediately on accept signal (waiting for stream)
+            document.getElementById('ringing-ui').style.display = 'none';
+            document.getElementById('video-grid').style.display = 'flex';
+            document.getElementById('video-controls').style.display = 'flex';
+          });
+
+          socket.on("call-rejected", () => {
+            alert("Call rejected.");
+            endCall();
+          });
+
+        } catch (err) {
+          console.error("Error accessing media:", err);
+          alert("Could not access camera/microphone");
+          endCall();
+        }
+      }
+
+      // 3. Receive Call (Listener)
+      socket.on("call-user", (data) => {
+        // data: { signal: offer, from: email }
+        incomingCallData = data;
+        document.getElementById('caller-id').innerText = data.from;
+        document.getElementById('incoming-call-alert').style.display = 'block';
+      });
+
+      // 4. Accept Call
+      async function acceptCall() {
+        document.getElementById('incoming-call-alert').style.display = 'none';
+        document.getElementById('video-call-modal').style.display = 'flex';
+
+        // Show Video Grid immediately for receiver
+        document.getElementById('ringing-ui').style.display = 'none';
+        document.getElementById('video-grid').style.display = 'flex';
+        document.getElementById('video-controls').style.display = 'flex';
+
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          document.getElementById('local-video').srcObject = localStream;
+
+          peer = new SimplePeer({ initiator: false, trickle: false, stream: localStream });
+
+          peer.on('signal', (data) => {
+            socket.emit("answer-call", { signal: data, to: incomingCallData.from });
+          });
+
+          peer.on('stream', (stream) => {
+            document.getElementById('remote-video').srcObject = stream;
+          });
+
+          peer.signal(incomingCallData.signal);
+
+        } catch (err) {
+          console.error(err);
+          endCall();
+        }
+      }
+
+      function rejectCall() {
+        document.getElementById('incoming-call-alert').style.display = 'none';
+        if (incomingCallData) {
+          socket.emit("reject-call", { to: incomingCallData.from });
+        }
+      }
+
+      function endCall() {
+        if (callTimeout) clearTimeout(callTimeout);
+        if (peer) peer.destroy();
+        if (localStream) localStream.getTracks().forEach(track => track.stop());
+        document.getElementById('video-call-modal').style.display = 'none';
+        // Clean up event listeners to avoid duplicates if re-added? (SimplePeer destroys itself usually)
+      }
+    </script>
 
 
 
-<!-- <script>
+    <!-- <script>
   const messagesEl = document.getElementById('messages');
   const input = document.getElementById('msgInput');
   const recipientEmailField = document.getElementById('recipientEmailField');
@@ -442,4 +1099,5 @@
 </script> -->
 
 </body>
+
 </html>

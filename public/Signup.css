@@ -1,49 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 body {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  height: 100vh;
-  /* display: flex; */
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  min-height: 100vh;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.page-container {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  /* Adjust for navbar */
+  display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
-.page-container {
-    width: 100vw;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
+
 .container {
   width: 100%;
-  max-width: 450px;
-  /* padding: 20px; */
+  max-width: 1000px;
+  /* Increased for split screen */
+}
+
+/* Split Screen Layout */
+.split-screen {
+  display: flex;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  overflow: hidden;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.hero-section {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.1);
+  /* Subtle contrast */
+  position: relative;
+}
+
+/* Hero Content Styles */
+.hero-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1rem;
+}
+
+.feature-item i {
+  color: #fff;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 50%;
 }
 
 .form-container {
-  background: white;
+  flex: 1;
   padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  box-shadow: none;
+  border: none;
 }
 
 h1 {
-  color: #333;
+  color: #fff;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   text-align: center;
   margin-bottom: 30px;
+  font-size: 0.95rem;
 }
 
 .input-group {
@@ -53,41 +136,83 @@ h1 {
 
 .input-group i {
   position: absolute;
-  left: 15px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  z-index: 10;
 }
 
-input {
+input,
+select {
   width: 100%;
-  padding: 15px 15px 15px 45px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  padding: 15px 20px 15px 50px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.15);
   font-size: 16px;
-  transition: border-color 0.3s ease;
+  color: #fff;
+  transition: all 0.3s ease;
+  outline: none;
 }
 
-input:focus {
-  border-color: #667eea;
-  outline: none;
+/* Custom Select styling */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+/* Ensure options are readable on the default white dropdown */
+option {
+  color: #333;
+  background: #fff;
+}
+
+input::placeholder,
+select::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+input:focus,
+select:focus {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #fff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+input:focus+i {
+  color: #fff;
 }
 
 .signup-btn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   border: none;
-  border-radius: 10px;
+  border-radius: 50px;
   color: white;
   font-size: 16px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
 }
 
 .signup-btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+  background: linear-gradient(135deg, #FF8E53 0%, #FF6B6B 100%);
 }
 
 .social-signup {
@@ -96,9 +221,10 @@ input:focus {
 }
 
 .social-signup p {
-  color: #666;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 20px;
   position: relative;
+  font-size: 0.9rem;
 }
 
 .social-signup p::before,
@@ -106,9 +232,9 @@ input:focus {
   content: "";
   position: absolute;
   top: 50%;
-  width: 45%;
+  width: 35%;
   height: 1px;
-  background-color: #ddd;
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .social-signup p::before {
@@ -122,84 +248,89 @@ input:focus {
 .social-buttons {
   display: flex;
   gap: 15px;
+  justify-content: center;
 }
 
 .social-btn {
   flex: 1;
   padding: 12px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .google {
-  background-color: #f2f2f2;
+  background: white;
   color: #333;
 }
 
 .facebook {
-  background-color: #1877f2;
+  background: #1877f2;
   color: white;
 }
 
 .social-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .login-link {
   text-align: center;
-  margin-top: 30px;
-  color: #666;
+  margin-top: 25px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
 }
 
 .login-link a {
-  color: #667eea;
+  color: #fff;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  position: relative;
 }
 
 .login-link a:hover {
   text-decoration: underline;
 }
-/* ... existing styles ... */
 
-.address-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.address-group .input-group {
-  flex: 1;
-}
-
-.input-group.city {
-  flex: 2;
-}
-
-.input-group.state {
-  flex: 1;
-}
-
-.input-group.zip {
-  flex: 1;
-}
-
-/* Ensure the address group is responsive */
-@media (max-width: 480px) {
-  .address-group {
-      flex-direction: column;
-      gap: 15px;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .address-group .input-group {
-      width: 100%;
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .split-screen {
+    flex-direction: column;
+  }
+
+  .hero-section {
+    padding: 30px 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .hero-features {
+    display: none;
+    /* Hide features on mobile to save space */
+  }
+
+  .form-container {
+    padding: 30px 20px;
   }
 }

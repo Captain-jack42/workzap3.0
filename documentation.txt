@@ -1,0 +1,27 @@
+*) i am working on feature were , when hirer click on hire buton the applicant get in the hirer hired list.
+problem : while showing hired list in dashboard we use worker model to fetch all worrker .
+so we have to send applicants worker id with application.
+
+*) i have done that only one user exist with one email.
+
+= >   problem solved!!!
+
+
+2) trying to implement chat facilites to user
+we are on postStartChart handling /startChat route;
+
+*) we have implemented chat section means starting phase where when user start communication with new user then there email get stored in each other database.
+*) now we have implement that , when user send any kindof message to any selected user then that message must get into both user database "Conversation".
+
+
+> i have done something in postjob function please chack it have a clear code
+> basically chat account is not saving anymore n database.
+
+> dashboard kaam nahi kar rahas
+> solved//
+
+now properly storing chat for different account seperately.
+
+
+> chat section aa to gaya per ab msg nahi bhej rahas
+> solved all chat and database relaed problem now we need to fix the problem of internal server error.

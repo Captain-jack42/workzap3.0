@@ -1,24 +1,22 @@
 <nav class="wzap-navbar">
     <div class="wzap-nav-brand">
         <i class="fas fa-briefcase"></i>
-        <span>WorkZap</span>
+        <span><p id="web-title">WorkZap</p></span>
     </div>
     <button class="wzap-mobile-menu-btn" onclick="wzapToggleMobileMenu()">
         <i class="fas fa-bars"></i>
     </button>
     <div class="wzap-nav-container" id="wzapNavContainer">
         <div class="wzap-nav-links">
-            <a href="/home" class="wzap-nav-link active">Home</a>
+            <a href="/home" class="wzap-nav-link ">Home</a>
             <% if(userType === 'hirer'){ %>
-            <a href="/host" class="wzap-nav-link">Hire</a>
-            <a href="/hired" class="wzap-nav-link">Manage Employees</a>
-            <a href="/dashboard" class="wzap-nav-link">Dashboard</a>
-            <!-- <a href="/payroll" class="wzap-nav-link">Payroll</a>
-            <a href="/report" class="wzap-nav-link">Reports</a> -->
+            <a href="/host" class="wzap-nav-link ">Hire</a>
+            <a href="/hired" class="wzap-nav-link ">Manage Employees</a>
+            <a href="/dashboard" class="wzap-nav-link ">Dashboard</a>
             <% }else{%>
-            <a href="/home/form" class="wzap-nav-link">Work</a>
+            <a href="/home/form" class="wzap-nav-link ">Work</a>
             <% } %>
-            <a href="/chat" class="wzap-nav-link ">Chat</a>
+            <a href="/chat" class="wzap-nav-link  ">Chat</a>
         </div>
         <div class="wzap-auth-buttons">
             <% if (isLoggedIn) { %>
@@ -50,7 +48,7 @@
 <% } else { %>
     <a href="/signup" class="wzap-auth-btn wzap-signup-btn">
         <i class="fas fa-user-plus"></i>
-        <span>Sign Up</span>
+        <span>Sign In</span>
     </a>
     <a href="/Login" class="wzap-auth-btn wzap-login-btn">
         <i class="fas fa-sign-in-alt"></i>
@@ -122,8 +120,13 @@
     gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #4f46e5;
+    color: #1910cf;
     z-index: 1001;
+}
+.wzap-nav-brand:hover {
+    /* background: rgba(175, 176, 248, 0.1); */
+    color: #0c0598;
+    box-shadow: 0 6px 8px rgba(36, 201, 222, 0.5);
 }
 .wzap-nav-container {
     display: flex;
@@ -137,16 +140,19 @@
 }
 .wzap-nav-link {
     text-decoration: none;
-    color: #4a5568;
+    color: #4f46e5;
+    background-color: #e9e9f7;
     font-weight: 500;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     transition: all 0.3s ease;
+    border: 1px solid #4f46e5;
 }
 .wzap-nav-link:hover, 
 .wzap-nav-link.active {
     background: rgba(99, 102, 241, 0.1);
     color: #4f46e5;
+    box-shadow: 0 6px 8px rgba(36, 201, 222, 0.5);
 }
 .wzap-help-link {
     display: flex;
@@ -172,8 +178,9 @@
     cursor: pointer;
 }
 .wzap-signup-btn {
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    color: white !important;
+    background: rgba(255, 255, 255, 0.9);
+    color: #4f46e5 !important;
+    border: 2px solid #4f46e5;
     box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
 }
 .wzap-login-btn {
@@ -184,14 +191,15 @@
 }
 .wzap-signup-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    background: #4f46e5;
+    color: white !important;
+     box-shadow: 0 6px 8px rgba(36, 201, 222, 0.5);
 }
 .wzap-login-btn:hover {
     transform: translateY(-2px);
     background: #4f46e5;
     color: white !important;
-    box-shadow: 0 6px 8px rgba(79, 70, 229, 0.2);
+     box-shadow: 0 6px 8px rgba(36, 201, 222, 0.5);
 }
 .wzap-mobile-menu-btn {
     display: none;

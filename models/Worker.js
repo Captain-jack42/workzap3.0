@@ -1,15 +1,15 @@
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../utils/databaseutil');
 
-let applicantId = 0;
 module.exports = class Worker{
-  constructor(fullName,gender,profession,experience,skills,_id){
+  constructor(fullName,gender,profession,experience,skills,email){
     
     this.fullName = fullName;
     this.gender = gender;
     this.profession = profession;
     this.experience = experience;
     this.skills = skills;
+    this.email = email;
   }
   
   save(){
@@ -19,7 +19,8 @@ module.exports = class Worker{
     gender : this.gender,
     profession : this.profession,
     experience : this.experience,
-    skills : this.skills
+    skills : this.skills,
+    email : this.email
     };
     return db.collection('Worker_data').insertOne(updatework)
     }

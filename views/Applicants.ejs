@@ -230,7 +230,7 @@
             <!-- quick action forms (non-invasive) -->
             <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
               <form method="POST" action="/applicant/hire" style="margin:0">
-                <input type="hidden" name="appId" value="${esc(a._id)}"/>
+                <input type="hidden" name="email" value="${esc(a.email)}"/>
                 <button class="btn" type="submit">Hire</button>
               </form>
               <form method="POST" action="/applicant/reject" style="margin:0">

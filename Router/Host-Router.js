@@ -52,6 +52,4 @@ const Hostcontroller = require('../controller/host');
 
     Hostrouter.post("/sendMessage", Hostcontroller.postSendMsg);
 
-    // Hostrouter.get("/Chat", Hostcontroller.getChat);
-
-exports.Hostrouter = Hostrouter;
+  exports.Hostrouter = Hostrouter;
