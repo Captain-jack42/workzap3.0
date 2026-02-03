@@ -922,7 +922,12 @@
           document.getElementById('local-video').srcObject = localStream;
 
           // Create Peer for Initiator
-          peer = new SimplePeer({ initiator: true, trickle: false, stream: localStream });
+          peer = new SimplePeer({
+            initiator: true,
+            trickle: false,
+            stream: localStream,
+            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+          });
 
           peer.on('signal', (data) => {
             socket.emit("call-user", {
@@ -986,7 +991,12 @@
           localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
           document.getElementById('local-video').srcObject = localStream;
 
-          peer = new SimplePeer({ initiator: false, trickle: false, stream: localStream });
+          peer = new SimplePeer({
+            initiator: false,
+            trickle: false,
+            stream: localStream,
+            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+          });
 
           peer.on('signal', (data) => {
             socket.emit("answer-call", { signal: data, to: incomingCallData.from });
